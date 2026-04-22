@@ -10,11 +10,8 @@ import {
   useState,
 } from "react";
 
-import { LabClock } from "@/components/site/LabClock";
-import { SiteLogo } from "@/components/site/SiteLogo";
 import { barLabelForPath } from "@/components/site/pathBarLabel";
 import { DEFAULT_MENU_ITEMS } from "@/lib/menuDefaults";
-import type { LabClockSchedule } from "@/lib/labHours";
 import type {
   NavigationPayload,
   SanityBottomLink,
@@ -31,7 +28,15 @@ type HeaderProps = {
   siteTitle?: string | null;
   sendFilmUrl?: string | null;
   navigation?: NavigationPayload | null;
-  labClockSchedule?: LabClockSchedule | null;
+  homeUtilityHref?: string | null;
+  homeUtilityPrimary?: string | null;
+  homeUtilitySecondary?: string | null;
+};
+
+type HomeFeatureChangeDetail = {
+  primary?: string;
+  secondary?: string;
+  href?: string;
 };
 
 function resolveMenuItems(nav: NavigationPayload | null | undefined): SanityMenuLink[] {
@@ -52,9 +57,10 @@ export function SiteHeader({
   siteTitle,
   sendFilmUrl,
   navigation,
-  labClockSchedule,
+  homeUtilityHref,
+  homeUtilityPrimary,
+  homeUtilitySecondary,
 }: HeaderProps) {
-  const siteLabel = siteTitle?.trim() || "Primary Photographic";
   const pathname = usePathname();
   const bar = barLabelForPath(pathname);
   const isHome = pathname === "/";
@@ -88,7 +94,7 @@ export function SiteHeader({
 
   const closeMenu = () => setMenuOpen(false);
 
-  /** Collapsed chrome: logo + menu bar (clock/links are fixed separately). Menu panel is absolutely positioned under the button so it does not change this height or main content offset. */
+  /** Collapsed chrome: menu bar only (clock/links are fixed separately). Menu panel is absolutely positioned under the button so it does not change this height or main content offset. */
   const chromeRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -118,14 +124,62 @@ export function SiteHeader({
   const pageBarLabel = bar;
   const menuButtonLabel =
     !isHome && !menuOpen && !barHovered ? pageBarLabel : "MENU";
+  const defaultSiteTitle = siteTitle?.trim() || "Primary Photographic";
+  const utilityPrimary = isHome
+    ? homeUtilityPrimary?.trim() || defaultSiteTitle
+    : defaultSiteTitle;
+  const utilitySecondary = isHome ? homeUtilitySecondary?.trim() : "";
+  const utilityHref = isHome ? homeUtilityHref?.trim() || "/" : "/";
+  const [liveUtility, setLiveUtility] = useState({
+    primary: utilityPrimary,
+    secondary: utilitySecondary,
+    href: utilityHref,
+  });
+
+  useEffect(() => {
+    setLiveUtility({
+      primary: utilityPrimary,
+      secondary: utilitySecondary,
+      href: utilityHref,
+    });
+  }, [utilityPrimary, utilitySecondary, utilityHref]);
+
+  useEffect(() => {
+    if (!isHome) return;
+    const onFeatureChange = (event: Event) => {
+      const detail = (event as CustomEvent<HomeFeatureChangeDetail>).detail;
+      if (!detail) return;
+      setLiveUtility({
+        primary: detail.primary?.trim() || utilityPrimary,
+        secondary: detail.secondary?.trim() || "",
+        href: detail.href?.trim() || utilityHref,
+      });
+    };
+    window.addEventListener("home-feature-change", onFeatureChange);
+    return () => window.removeEventListener("home-feature-change", onFeatureChange);
+  }, [isHome, utilityPrimary, utilityHref]);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 w-full">
-      {/* Does not reserve layout height — logo + menu sit higher; clock/links stay tappable in the corners. */}
+      {/* Does not reserve layout height — menu sits high; utility links stay tappable in the corners. */}
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex items-start justify-between gap-4 px-4 pt-4">
-        <div className="pointer-events-auto min-w-0 shrink-0">
-          <LabClock schedule={labClockSchedule} />
-        </div>
+        <Link
+          href={liveUtility.href}
+          className="group pointer-events-auto min-w-0 shrink text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]"
+          aria-label={isHome ? "Go to featured item" : "Go to homepage"}
+        >
+          <p className="truncate">
+            <span>{liveUtility.primary}</span>
+            {liveUtility.secondary ? (
+              <>
+                {" "}
+                <span className="text-[var(--color-muted)] group-hover:text-[var(--color-ink)]">
+                  {liveUtility.secondary}
+                </span>
+              </>
+            ) : null}
+          </p>
+        </Link>
         <div className="pointer-events-auto flex shrink-0 gap-4 text-[length:var(--text-small)] font-medium uppercase leading-[1.2em]">
           <a
             className="text-[var(--color-ink)] hover:opacity-80"
@@ -139,20 +193,8 @@ export function SiteHeader({
 
       <div
         ref={chromeRef}
-        className={`relative z-50 flex w-full flex-col gap-4 px-4 pt-4 ${menuOpen ? "pb-0" : "pb-4"}`}
+        className={`relative z-50 flex w-full flex-col gap-2 px-4 pt-2 ${menuOpen ? "pb-0" : "pb-4"}`}
       >
-        <div className="mx-auto w-full max-w-site">
-          <div className="flex justify-center">
-            <Link
-              href="/"
-              aria-label={siteLabel}
-              className="block w-full max-w-full text-[var(--color-ink)] hover:opacity-80"
-            >
-              <SiteLogo />
-            </Link>
-          </div>
-        </div>
-
         <div className="mx-auto w-full max-w-site">
           <div className="flex justify-center">
             <div className="relative w-full bg-[var(--color-ink)] text-white">

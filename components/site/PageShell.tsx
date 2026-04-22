@@ -12,9 +12,14 @@ type Props = {
   footerBody?: PortableTextBlock[] | null;
   sendFilmUrl?: string | null;
   navigation?: NavigationPayload | null;
+  homeUtilityHref?: string | null;
+  homeUtilityPrimary?: string | null;
+  homeUtilitySecondary?: string | null;
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  footerAddressLeft?: string | null;
+  footerAddressRight?: string | null;
   hours?: string | null;
   labClockSchedule?: LabClockSchedule | null;
 };
@@ -25,9 +30,14 @@ export function PageShell({
   footerBody,
   sendFilmUrl,
   navigation,
+  homeUtilityHref,
+  homeUtilityPrimary,
+  homeUtilitySecondary,
   email,
   phone,
   address,
+  footerAddressLeft,
+  footerAddressRight,
   hours,
   labClockSchedule,
 }: Props) {
@@ -37,15 +47,18 @@ export function PageShell({
         siteTitle={siteTitle}
         sendFilmUrl={sendFilmUrl}
         navigation={navigation}
-        labClockSchedule={labClockSchedule}
+        homeUtilityHref={homeUtilityHref}
+        homeUtilityPrimary={homeUtilityPrimary}
+        homeUtilitySecondary={homeUtilitySecondary}
       />
       <div
         className="w-full px-4"
         style={{
           paddingTop: "calc(var(--site-header-height, 280px) + 2.5rem)",
+          paddingBottom: "calc(var(--site-footer-height, 260px) + 1rem)",
         }}
       >
-        <div className="mx-auto w-full max-w-site flex-1 pb-10 sm:pb-14">
+        <div className="mx-auto w-full max-w-site flex-1">
           {children}
         </div>
       </div>
@@ -55,6 +68,8 @@ export function PageShell({
         email={email}
         phone={phone}
         address={address}
+        footerAddressLeft={footerAddressLeft}
+        footerAddressRight={footerAddressRight}
         hours={hours}
         labClockSchedule={labClockSchedule}
       />

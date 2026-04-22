@@ -1,6 +1,7 @@
 import { PortableBody } from "@/components/content/PortableBody";
 import { ImageStrip } from "@/components/content/ImageStrip";
 import { ListingAccordion } from "@/components/content/ListingAccordion";
+import { listingAnchorId } from "@/lib/listingAnchors";
 import { ListingBanner } from "@/components/listing/ListingBanner";
 import { FullBleed } from "@/components/site/FullBleed";
 import { getCommissionItems } from "@/sanity/lib/fetch";
@@ -34,7 +35,11 @@ export default async function CommissionsPage() {
       <h1 className="sr-only">Commissions</h1>
 
       {featured ? (
-        <section className="space-y-8" aria-label="Featured commission">
+        <section
+          className="space-y-8 scroll-mt-40"
+          id={listingAnchorId(featured._id)}
+          aria-label="Featured commission"
+        >
           <ListingBanner
             left={featured.eyebrow?.trim() || ""}
             title={featured.title}

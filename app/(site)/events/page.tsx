@@ -1,6 +1,7 @@
 import { PortableBody } from "@/components/content/PortableBody";
 import { ImageStrip } from "@/components/content/ImageStrip";
 import { EventRow } from "@/components/events/EventRow";
+import { listingAnchorId } from "@/lib/listingAnchors";
 import { FullBleed } from "@/components/site/FullBleed";
 import { getEventItems } from "@/sanity/lib/fetch";
 import type { EventDocument } from "@/types/sanity";
@@ -33,7 +34,11 @@ export default async function EventsPage() {
       <h1 className="sr-only">Events</h1>
 
       {featured ? (
-        <section className="space-y-8" aria-label="Featured event">
+        <section
+          className="space-y-8 scroll-mt-40"
+          id={listingAnchorId(featured._id)}
+          aria-label="Featured event"
+        >
           <EventRow item={featured} />
           <FullBleed>
             <ImageStrip images={featured.gallery} tall />
@@ -48,7 +53,11 @@ export default async function EventsPage() {
         {rest.length ? (
           <div data-listing-row-list>
             {rest.map((item) => (
-              <div key={item._id} className="listing-row-item">
+              <div
+                key={item._id}
+                id={listingAnchorId(item._id)}
+                className="listing-row-item scroll-mt-40"
+              >
                 <EventRow item={item} />
               </div>
             ))}

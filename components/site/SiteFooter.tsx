@@ -1,4 +1,8 @@
+"use client";
+
 import type { PortableTextBlock } from "@portabletext/types";
+import Link from "next/link";
+import { useLayoutEffect, useRef } from "react";
 
 import { PortableBody } from "@/components/content/PortableBody";
 import { LabClock } from "@/components/site/LabClock";
@@ -10,6 +14,8 @@ type Props = {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  footerAddressLeft?: string | null;
+  footerAddressRight?: string | null;
   hours?: string | null;
   labClockSchedule?: LabClockSchedule | null;
 };
@@ -20,22 +26,64 @@ export function SiteFooter({
   email,
   phone,
   address,
+  footerAddressLeft,
+  footerAddressRight,
   hours,
   labClockSchedule,
 }: Props) {
   const name = (siteTitle?.trim() || "PRIMARY PHOTOGRAPHIC").toUpperCase();
+  const footerRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const el = footerRef.current;
+    if (!el || typeof document === "undefined") return;
+
+    const publishHeight = () => {
+      const h = Math.ceil(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty(
+        "--site-footer-height",
+        `${h}px`,
+      );
+    };
+
+    publishHeight();
+
+    const ro = new ResizeObserver(publishHeight);
+    ro.observe(el);
+    window.addEventListener("resize", publishHeight);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", publishHeight);
+    };
+  }, []);
 
   return (
-    <footer className="mt-auto">
-      <div className="w-full px-4 py-10">
-        <div className="grid w-full gap-10 lg:grid-cols-[1fr_auto_1fr] lg:items-end">
-          <div className="justify-self-start lg:flex lg:justify-start">
+    <footer
+      ref={footerRef}
+      className="fixed inset-x-0 bottom-0 z-40"
+      data-site-footer
+    >
+      <div className="relative w-full px-4 pb-4 pt-10">
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 grid grid-cols-[1fr_auto] items-end px-4">
+          <div className="pointer-events-auto justify-self-start">
             <LabClock schedule={labClockSchedule} />
           </div>
+          <div className="pointer-events-auto justify-self-end text-[length:var(--text-small)] uppercase leading-[1.2em] text-right">
+            <div className="flex items-baseline gap-4">
+              <a className="text-[var(--color-ink)] hover:opacity-80" href={email ? `mailto:${email}` : "#"}>
+                Email address
+              </a>
+              <a className="text-[var(--color-ink)] hover:opacity-80" href="#">
+                Subscribe
+              </a>
+            </div>
+          </div>
+        </div>
 
-          <div className="min-w-0 w-full max-w-site justify-self-center text-justify">
+        <div className="mx-auto w-full max-w-site pb-4 text-justify">
             {footerBody?.length ? (
-              <div className="mx-auto max-w-3xl text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-ink)]">
+              <div className="mx-auto max-w-3xl text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-muted)] [&_a]:!text-[var(--color-ink)] [&_li]:!text-[var(--color-muted)] [&_p]:!text-[var(--color-muted)] [&_strong]:!text-[var(--color-ink)]">
                 <PortableBody
                   compact
                   value={footerBody}
@@ -43,8 +91,11 @@ export function SiteFooter({
                 />
               </div>
             ) : (
-              <p className="mx-auto max-w-3xl text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-ink)]">
-                <strong className="font-medium">{name}</strong> is a high-end
+              <p className="mx-auto max-w-3xl text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-muted)]">
+                <Link href="/" className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-2 hover:opacity-80">
+                  {name}
+                </Link>{" "}
+                is a high-end
                 photographic film lab that works with professionals and amateurs
                 alike.
                 {address ? (
@@ -73,7 +124,7 @@ export function SiteFooter({
                     {" "}
                     Contact us at{" "}
                     <a
-                      className="font-medium underline decoration-[var(--color-ink)] underline-offset-2"
+                      className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-2"
                       href={`mailto:${email}`}
                     >
                       {email}
@@ -85,7 +136,7 @@ export function SiteFooter({
                     {" "}
                     or{" "}
                     <a
-                      className="font-medium underline decoration-[var(--color-ink)] underline-offset-2"
+                      className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-2"
                       href={`tel:${phone.replace(/\s+/g, "")}`}
                     >
                       {phone}
@@ -97,15 +148,18 @@ export function SiteFooter({
                 submission details.
               </p>
             )}
-          </div>
+        </div>
 
-          <div className="justify-self-end text-[length:var(--text-small)] uppercase leading-[1.2em] lg:text-right">
-            <div className="flex items-baseline gap-4 text-[var(--color-muted)]">
-              <p>Email address</p>
-              <p className="text-[var(--color-ink)]">Subscribe</p>
+        {(footerAddressLeft || footerAddressRight) && (
+          <div className="mx-auto mt-0 w-full max-w-site">
+            <div className="mx-auto w-full max-w-3xl">
+              <div className="grid w-full gap-3 text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)] sm:grid-cols-2">
+                <p className="text-left">{footerAddressLeft || "\u00a0"}</p>
+                <p className="text-left sm:text-right">{footerAddressRight || "\u00a0"}</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </footer>
   );

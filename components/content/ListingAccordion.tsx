@@ -1,8 +1,12 @@
+"use client";
+
 import type { PortableTextBlock } from "@portabletext/types";
+import { useEffect } from "react";
 
 import { ImageStrip } from "@/components/content/ImageStrip";
 import { PortableBody } from "@/components/content/PortableBody";
 import { ListingBanner } from "@/components/listing/ListingBanner";
+import { listingAnchorId } from "@/lib/listingAnchors";
 import { FullBleed } from "@/components/site/FullBleed";
 
 type GalleryImage = {
@@ -22,6 +26,21 @@ export type ListingEntry = {
 };
 
 export function ListingAccordion({ items }: { items: ListingEntry[] }) {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const openFromHash = () => {
+      const hash = window.location.hash.replace(/^#/, "");
+      if (!hash) return;
+      const target = document.getElementById(hash);
+      if (target instanceof HTMLDetailsElement) {
+        target.open = true;
+      }
+    };
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
+    return () => window.removeEventListener("hashchange", openFromHash);
+  }, []);
+
   if (!items.length) {
     return (
       <p className="text-[length:var(--text-body)] leading-[1.2em] text-[var(--color-muted)]">
@@ -35,7 +54,8 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
       {items.map((item) => (
         <details
           key={item._id}
-          className="listing-row-item"
+          id={listingAnchorId(item._id)}
+          className="listing-row-item scroll-mt-40"
         >
           <summary className="group relative cursor-pointer list-none [&::-webkit-details-marker]:hidden">
             <ListingBanner

@@ -57,6 +57,14 @@ body {
   letter-spacing: 0;
 }
 
+[class*="text-[length:var(--text-small)]"] {
+  letter-spacing: 0.01em;
+}
+
+p[class*="text-[length:var(--text-small)]"] {
+  line-height: 1.25em;
+}
+
 /* Primary menu panel: fade siblings when one link is hovered or focus-visible */
 [data-site-menu-nav] > li {
   transition: opacity 0.25s ease;
@@ -94,4 +102,10 @@ body {
 [data-listing-row-list] > .listing-row-item:hover,
 [data-listing-row-list] > .listing-row-item:focus-within {
   opacity: 1;
+}
+
+html.home-no-scroll,
+html.home-no-scroll body {
+  height: 100%;
+  overflow: hidden;
 }

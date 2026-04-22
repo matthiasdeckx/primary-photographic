@@ -41,6 +41,8 @@ export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
   contactEmail,
   contactPhone,
   address,
+  footerAddressLeft,
+  footerAddressRight,
   openingHours,
   labClockSchedule{
     monday{ closed, openTime, closeTime },

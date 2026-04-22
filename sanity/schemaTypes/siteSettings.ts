@@ -117,6 +117,18 @@ export const siteSettings = defineType({
       rows: 3,
     }),
     defineField({
+      name: "footerAddressLeft",
+      title: "Footer address row — left",
+      type: "string",
+      description: "Small uppercase line shown beneath the footer paragraph.",
+    }),
+    defineField({
+      name: "footerAddressRight",
+      title: "Footer address row — right",
+      type: "string",
+      description: "Small uppercase line shown beneath the footer paragraph.",
+    }),
+    defineField({
       name: "labClockSchedule",
       title: "Lab clock schedule (New York time)",
       type: "object",
