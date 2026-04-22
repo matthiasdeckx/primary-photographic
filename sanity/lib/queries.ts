@@ -17,7 +17,19 @@ export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
   title,
   tagline,
   sendFilmUrl,
-  cartUrl,
+  homeFeaturedItems[]->{
+    _id,
+    _type,
+    title,
+    eyebrow,
+    eventType,
+    eventDateFrom,
+    eventDateTo,
+    eventDate,
+    category,
+    homepageFeatureImages,
+    gallery
+  },
   homeSpotlightLeft,
   homeSpotlightRight,
   heroImageLeft,
@@ -44,6 +56,7 @@ export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
 export const servicesPageQuery = groq`*[_type == "servicesPage"][0]{
   title,
   servicesPdfUrl,
+  sideImages,
   services[]{
     sectionHeading,
     lines[]{
@@ -60,6 +73,7 @@ export const servicesPageQuery = groq`*[_type == "servicesPage"][0]{
 
 export const technicalInfoPageQuery = groq`*[_type == "technicalInfoPage"][0]{
   title,
+  sideImages,
   sections[]{
     sectionTitle,
     body
@@ -68,31 +82,32 @@ export const technicalInfoPageQuery = groq`*[_type == "technicalInfoPage"][0]{
 
 export const aboutPageQuery = groq`*[_type == "aboutPage"][0]{
   title,
+  sideImages,
   sections[]{
     sectionTitle,
     body
   }
 }`;
 
-export const eventItemsQuery = groq`*[_type == "eventItem"] | order(sortOrder asc, _createdAt desc){
+export const eventItemsQuery = groq`*[_type == "eventItem"] | order(coalesce(eventDateFrom, eventDate) asc, _createdAt desc){
   _id,
   title,
   eyebrow,
+  eventDateFrom,
+  eventDateTo,
   eventDate,
   eventType,
   featured,
   body,
-  gallery,
-  sortOrder
+  gallery
 }`;
 
-export const commissionItemsQuery = groq`*[_type == "commissionItem"] | order(sortOrder asc, _createdAt desc){
+export const commissionItemsQuery = groq`*[_type == "commissionItem"] | order(orderRank asc, _createdAt desc){
   _id,
   title,
   eyebrow,
   category,
   featured,
   body,
-  gallery,
-  sortOrder
+  gallery
 }`;

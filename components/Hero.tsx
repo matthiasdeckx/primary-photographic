@@ -1,11 +1,12 @@
 import Image from "next/image";
 
-import { urlForImage } from "@/sanity/lib/image";
+import { blurDataUrlForImage, urlForImage } from "@/sanity/lib/image";
 import type { SiteSettings } from "@/lib/site";
 
 export function Hero({ site }: { site: SiteSettings }) {
   const img = site.heroImage;
-  const url = img ? urlForImage(img)?.width(2400).height(1400).quality(90).url() : null;
+  const url = img ? urlForImage(img)?.width(2400).height(1400).url() : null;
+  const blur = img ? blurDataUrlForImage(img) : undefined;
   const alt = img?.alt || `${site.title} — hero`;
 
   return (
@@ -15,9 +16,10 @@ export function Hero({ site }: { site: SiteSettings }) {
           src={url}
           alt={alt}
           fill
-          priority
           className="object-cover"
           sizes="100vw"
+          placeholder={blur ? "blur" : "empty"}
+          blurDataURL={blur}
         />
       ) : (
         <div

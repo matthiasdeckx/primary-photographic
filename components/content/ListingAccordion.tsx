@@ -31,11 +31,11 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
   }
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-0" data-listing-row-list>
       {items.map((item) => (
         <details
           key={item._id}
-          className=""
+          className="listing-row-item"
         >
           <summary className="group relative cursor-pointer list-none [&::-webkit-details-marker]:hidden">
             <ListingBanner
@@ -45,9 +45,9 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
               titleAlign="center"
               bleedClassName="py-4"
               overlay={
-                <span
+                <div
                   aria-hidden
-                  className="pointer-events-none absolute inset-y-0 -mx-4 hidden items-center justify-between sm:-mx-6 group-hover:flex group-focus-within:flex [details[open]_&]:flex"
+                  className="pointer-events-none absolute inset-y-0 inset-x-0 hidden items-center justify-between group-hover:flex group-focus-within:flex [details[open]_&]:flex"
                 >
                   <span className="text-[length:var(--text-body)] leading-[1.2em] text-[var(--color-muted)]">
                     <span className="[details[open]_&]:hidden">+</span>
@@ -57,7 +57,7 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
                     <span className="[details[open]_&]:hidden">+</span>
                     <span className="hidden [details[open]_&]:inline">−</span>
                   </span>
-                </span>
+                </div>
               }
             />
           </summary>

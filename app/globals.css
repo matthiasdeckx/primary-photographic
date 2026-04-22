@@ -72,3 +72,26 @@ body {
 [data-site-menu-nav]:has(> li:focus-within) > li:not(:focus-within) {
   opacity: 0.35;
 }
+
+/* Events/commissions rows: fade sibling rows on hover/focus */
+[data-listing-row-list] > .listing-row-item {
+  transition: opacity 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-listing-row-list] > .listing-row-item {
+    transition: none;
+  }
+}
+
+/* Browser-safe sibling fade without :has():
+   dim all when container is active, then restore hovered/focused row */
+[data-listing-row-list]:hover > .listing-row-item,
+[data-listing-row-list]:focus-within > .listing-row-item {
+  opacity: 0.35;
+}
+
+[data-listing-row-list] > .listing-row-item:hover,
+[data-listing-row-list] > .listing-row-item:focus-within {
+  opacity: 1;
+}

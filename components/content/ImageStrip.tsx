@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { urlForImage } from "@/sanity/lib/image";
+import { blurDataUrlForImage, urlForImage } from "@/sanity/lib/image";
 
 type GalleryImage = {
   _key?: string;
@@ -20,19 +20,23 @@ export function ImageStrip({
   tall?: boolean;
 }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [lightboxVisible, setLightboxVisible] = useState(false);
+  const [loadedKeys, setLoadedKeys] = useState<Record<string, boolean>>({});
   const [isVisible, setIsVisible] = useState(false);
   const [isParentOpen, setIsParentOpen] = useState(true);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<number | null>(null);
 
   const usableImages = useMemo(
     () =>
       (images ?? [])
         .map((img, i) => {
-          const url = urlForImage(img)?.width(1600).quality(85).url();
+          const url = urlForImage(img)?.width(1600).url();
           if (!url) return null;
           return {
             key: img._key || `${url}-${i}`,
             url,
+            blurUrl: blurDataUrlForImage(img),
             alt: img.alt || "",
             caption: img.caption || "",
           };
@@ -44,6 +48,24 @@ export function ImageStrip({
   if (!usableImages.length) return null;
 
   const frameHeightClass = tall ? "h-[400px]" : "h-[400px]";
+
+  const openLightbox = (index: number) => {
+    if (closeTimeoutRef.current) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setLightboxIndex(index);
+    window.requestAnimationFrame(() => setLightboxVisible(true));
+  };
+
+  const closeLightbox = () => {
+    setLightboxVisible(false);
+    if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setLightboxIndex(null);
+      closeTimeoutRef.current = null;
+    }, 180);
+  };
 
   useEffect(() => {
     const node = scrollerRef.current;
@@ -113,7 +135,7 @@ export function ImageStrip({
     if (lightboxIndex === null) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setLightboxIndex(null);
+        closeLightbox();
       } else if (e.key === "ArrowRight") {
         setLightboxIndex((current) =>
           current === null ? current : (current + 1) % usableImages.length,
@@ -130,6 +152,12 @@ export function ImageStrip({
     return () => window.removeEventListener("keydown", onKey);
   }, [lightboxIndex, usableImages.length]);
 
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
+    };
+  }, []);
+
   return (
     <>
       <div
@@ -142,14 +170,28 @@ export function ImageStrip({
               <button
                 type="button"
                 className="shrink-0 cursor-zoom-in bg-black/5"
-                onClick={() => setLightboxIndex(i)}
+                onClick={() => openLightbox(i)}
                 aria-label={`Open image ${i + 1} in lightbox`}
               >
                 <img
                   src={img.url}
                   alt={img.alt}
                   loading="lazy"
-                  className={`${frameHeightClass} block w-auto max-w-none object-contain`}
+                  onLoad={() =>
+                    setLoadedKeys((prev) => ({ ...prev, [img.key]: true }))
+                  }
+                  className={`${frameHeightClass} block w-auto max-w-none object-contain transition-opacity duration-300 ${
+                    loadedKeys[img.key] ? "opacity-100" : "opacity-0"
+                  }`}
+                  style={
+                    !loadedKeys[img.key] && img.blurUrl
+                      ? {
+                          backgroundImage: `url(${img.blurUrl})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                        }
+                      : undefined
+                  }
                 />
               </button>
               {img.caption ? (
@@ -164,17 +206,23 @@ export function ImageStrip({
 
       {lightboxIndex !== null ? (
         <div
-          className="fixed inset-0 z-[100] bg-white/80 p-4 backdrop-blur-sm"
+          className={`fixed inset-0 z-[100] bg-white/80 p-4 backdrop-blur-sm transition-opacity duration-200 ${
+            lightboxVisible ? "opacity-100" : "opacity-0"
+          }`}
           role="dialog"
           aria-modal="true"
           aria-label="Image lightbox"
-          onClick={() => setLightboxIndex(null)}
+          onClick={closeLightbox}
         >
-          <div className="mx-auto flex h-full w-full max-w-6xl flex-col">
+          <div
+            className={`mx-auto flex h-full w-full max-w-6xl flex-col transition-all duration-200 ${
+              lightboxVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
+            }`}
+          >
             <div className="flex justify-end pb-3">
               <button
                 type="button"
-                onClick={() => setLightboxIndex(null)}
+                onClick={closeLightbox}
                 className="text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
                 aria-label="Close lightbox"
               >
@@ -192,6 +240,8 @@ export function ImageStrip({
                   fill
                   sizes="100vw"
                   className="object-contain"
+                  placeholder={usableImages[lightboxIndex].blurUrl ? "blur" : "empty"}
+                  blurDataURL={usableImages[lightboxIndex].blurUrl}
                 />
               </div>
             </div>
@@ -223,6 +273,8 @@ export function ImageStrip({
                     fill
                     sizes="56px"
                     className="object-cover"
+                    placeholder={img.blurUrl ? "blur" : "empty"}
+                    blurDataURL={img.blurUrl}
                   />
                 </button>
               ))}

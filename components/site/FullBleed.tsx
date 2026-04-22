@@ -9,7 +9,7 @@ type Props = {
 export function FullBleed({ children, className = "" }: Props) {
   return (
     <div
-      className={`box-border w-screen max-w-[100vw] shrink-0 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] px-4 sm:px-6 ${className}`}
+      className={`box-border w-screen max-w-[100vw] shrink-0 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] px-4 sm:px-4 ${className}`}
     >
       {children}
     </div>

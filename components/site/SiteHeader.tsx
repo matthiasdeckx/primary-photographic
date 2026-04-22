@@ -30,7 +30,6 @@ const bottomLinkClass =
 type HeaderProps = {
   siteTitle?: string | null;
   sendFilmUrl?: string | null;
-  cartUrl?: string | null;
   navigation?: NavigationPayload | null;
   labClockSchedule?: LabClockSchedule | null;
 };
@@ -52,7 +51,6 @@ function resolveBottomLink(
 export function SiteHeader({
   siteTitle,
   sendFilmUrl,
-  cartUrl,
   navigation,
   labClockSchedule,
 }: HeaderProps) {
@@ -87,7 +85,6 @@ export function SiteHeader({
   }, [menuOpen]);
 
   const send = sendFilmUrl?.trim() || "#";
-  const cart = cartUrl?.trim() || "#";
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -136,13 +133,6 @@ export function SiteHeader({
             {...(send.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
           >
             Send film
-          </a>
-          <a
-            className="text-[var(--color-ink)] hover:opacity-80"
-            href={cart}
-            {...(cart.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
-          >
-            Cart
           </a>
         </div>
       </div>

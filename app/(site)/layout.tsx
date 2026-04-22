@@ -14,7 +14,6 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       siteTitle={settings?.title}
       footerBody={settings?.footerBody}
       sendFilmUrl={settings?.sendFilmUrl}
-      cartUrl={settings?.cartUrl}
       navigation={navigation}
       email={settings?.contactEmail}
       phone={settings?.contactPhone}

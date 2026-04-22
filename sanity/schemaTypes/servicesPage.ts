@@ -100,5 +100,27 @@ export const servicesPage = defineType({
         },
       ],
     }),
+    defineField({
+      name: "sideImages",
+      title: "Side images",
+      type: "array",
+      description:
+        "Optional decorative images shown in the left/right whitespace on wide screens (1 to 5).",
+      validation: (Rule) => Rule.max(5),
+      of: [
+        defineField({
+          name: "sideImage",
+          type: "image",
+          options: { hotspot: true },
+          fields: [
+            defineField({
+              name: "alt",
+              title: "Alternative text",
+              type: "string",
+            }),
+          ],
+        }),
+      ],
+    }),
   ],
 });

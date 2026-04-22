@@ -46,9 +46,11 @@ export default async function EventsPage() {
 
       <div>
         {rest.length ? (
-          <div>
+          <div data-listing-row-list>
             {rest.map((item) => (
-              <EventRow key={item._id} item={item} />
+              <div key={item._id} className="listing-row-item">
+                <EventRow item={item} />
+              </div>
             ))}
           </div>
         ) : null}

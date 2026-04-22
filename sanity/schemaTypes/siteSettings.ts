@@ -23,15 +23,26 @@ export const siteSettings = defineType({
       type: "url",
     }),
     defineField({
-      name: "cartUrl",
-      title: "Cart URL",
-      type: "url",
+      name: "homeFeaturedItems",
+      title: "Homepage featured source documents",
+      type: "array",
+      description:
+        "Select one or more Events/Commissions. Homepage spotlight text/images are pulled automatically from the first selected item.",
+      validation: (Rule) => Rule.min(1).warning("Select at least one featured item."),
+      of: [
+        defineField({
+          name: "homeFeaturedRef",
+          title: "Homepage featured reference",
+          type: "reference",
+          to: [{ type: "eventItem" }, { type: "commissionItem" }],
+        }),
+      ],
     }),
     defineField({
       name: "homeSpotlightLeft",
       title: "Home spotlight — left",
       type: "string",
-      description: "e.g. artist name (left column of the hero row).",
+      description: "Legacy fallback. Prefer ‘Homepage featured source documents’.",
     }),
     defineField({
       name: "homeSpotlightRight",
@@ -43,6 +54,7 @@ export const siteSettings = defineType({
       name: "heroImageLeft",
       title: "Home — left image",
       type: "image",
+      hidden: true,
       options: { hotspot: true },
       fields: [
         defineField({ name: "alt", type: "string", title: "Alternative text" }),
@@ -52,6 +64,7 @@ export const siteSettings = defineType({
       name: "heroImageRight",
       title: "Home — right image",
       type: "image",
+      hidden: true,
       options: { hotspot: true },
       fields: [
         defineField({ name: "alt", type: "string", title: "Alternative text" }),

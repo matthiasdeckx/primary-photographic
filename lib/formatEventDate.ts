@@ -13,3 +13,14 @@ export function formatEventDate(isoDate: string | undefined | null): string {
     })
     .toUpperCase();
 }
+
+export function formatEventDateRange(
+  fromIso: string | undefined | null,
+  toIso: string | undefined | null,
+): string {
+  const from = formatEventDate(fromIso);
+  if (!from) return "";
+  const to = formatEventDate(toIso);
+  if (!to || to === from) return from;
+  return `${from} — ${to}`;
+}

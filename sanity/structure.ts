@@ -1,6 +1,7 @@
 import type { StructureResolver } from "sanity/structure";
+import { orderableDocumentListDeskItem } from "@sanity/orderable-document-list";
 
-export const structure: StructureResolver = (S) =>
+export const structure: StructureResolver = (S, context) =>
   S.list()
     .title("Content")
     .items([
@@ -33,6 +34,21 @@ export const structure: StructureResolver = (S) =>
         .id("aboutPage")
         .child(S.document().schemaType("aboutPage").documentId("aboutPage")),
       S.divider(),
-      S.documentTypeListItem("eventItem").title("Events"),
-      S.documentTypeListItem("commissionItem").title("Commissions"),
+      S.listItem()
+        .title("Events")
+        .id("eventItem")
+        .child(
+          S.documentTypeList("eventItem")
+            .title("Events")
+            .defaultOrdering([
+              { field: "eventDateFrom", direction: "asc" },
+              { field: "_createdAt", direction: "desc" },
+            ]),
+        ),
+      orderableDocumentListDeskItem({
+        type: "commissionItem",
+        title: "Commissions (drag to sort)",
+        S,
+        context,
+      }),
     ]);

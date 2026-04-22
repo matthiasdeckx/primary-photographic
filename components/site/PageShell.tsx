@@ -11,7 +11,6 @@ type Props = {
   siteTitle?: string | null;
   footerBody?: PortableTextBlock[] | null;
   sendFilmUrl?: string | null;
-  cartUrl?: string | null;
   navigation?: NavigationPayload | null;
   email?: string | null;
   phone?: string | null;
@@ -25,7 +24,6 @@ export function PageShell({
   siteTitle,
   footerBody,
   sendFilmUrl,
-  cartUrl,
   navigation,
   email,
   phone,
@@ -38,7 +36,6 @@ export function PageShell({
       <SiteHeader
         siteTitle={siteTitle}
         sendFilmUrl={sendFilmUrl}
-        cartUrl={cartUrl}
         navigation={navigation}
         labClockSchedule={labClockSchedule}
       />

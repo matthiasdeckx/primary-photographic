@@ -10,6 +10,8 @@ export type SanityGalleryImage = {
 };
 
 export type EventDocument = EventListItem & {
+  eventDateFrom?: string | null;
+  eventDateTo?: string | null;
   body?: PortableTextBlock[] | null;
   gallery?: SanityGalleryImage[] | null;
   featured?: boolean | null;
