@@ -21,6 +21,15 @@ export const siteSettings = defineType({
       name: "sendFilmUrl",
       title: "Send film URL",
       type: "url",
+      description: "Legacy fallback. Prefer uploading the PDF below.",
+    }),
+    defineField({
+      name: "sendFilmPdf",
+      title: "Send film PDF",
+      type: "file",
+      options: {
+        accept: "application/pdf",
+      },
     }),
     defineField({
       name: "homeFeaturedItems",

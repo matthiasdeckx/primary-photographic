@@ -27,6 +27,7 @@ const bottomLinkClass =
 type HeaderProps = {
   siteTitle?: string | null;
   sendFilmUrl?: string | null;
+  sendFilmPdfUrl?: string | null;
   navigation?: NavigationPayload | null;
   homeUtilityHref?: string | null;
   homeUtilityPrimary?: string | null;
@@ -56,6 +57,7 @@ function resolveBottomLink(
 export function SiteHeader({
   siteTitle,
   sendFilmUrl,
+  sendFilmPdfUrl,
   navigation,
   homeUtilityHref,
   homeUtilityPrimary,
@@ -90,7 +92,9 @@ export function SiteHeader({
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
-  const send = sendFilmUrl?.trim() || "#";
+  const send = sendFilmPdfUrl?.trim() || sendFilmUrl?.trim() || "#";
+  const sendIsExternal = /^https?:\/\//i.test(send);
+  const isSendFilmLabel = (label: string) => label.trim().toLowerCase() === "send film";
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -184,7 +188,7 @@ export function SiteHeader({
           <a
             className="text-[var(--color-ink)] hover:opacity-80"
             href={send}
-            {...(send.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
+            {...(sendIsExternal ? { target: "_blank", rel: "noreferrer" } : {})}
           >
             Send film
           </a>
@@ -213,7 +217,7 @@ export function SiteHeader({
               {menuOpen ? (
                 <div
                   id="primary-menu-panel"
-                  className="absolute inset-x-0 top-full z-10 bg-[var(--color-ink)] px-4 pb-10 pt-4 text-white"
+                  className="absolute inset-x-0 top-full z-10 bg-[var(--color-ink)] px-4 pb-4 pt-4 text-white"
                 >
                   <nav aria-label="Primary" className="py-4">
                     <ul
@@ -224,6 +228,22 @@ export function SiteHeader({
                         const label = item.label?.trim();
                         if (!label) return null;
                         const key = `${label}-${index}`;
+                        if (isSendFilmLabel(label)) {
+                          return (
+                            <li key={key}>
+                              <a
+                                href={send}
+                                className={menuLinkClass}
+                                {...(sendIsExternal
+                                  ? { target: "_blank", rel: "noreferrer" }
+                                  : {})}
+                                onClick={closeMenu}
+                              >
+                                {label}
+                              </a>
+                            </li>
+                          );
+                        }
 
                         if (item.linkType === "external") {
                           const href = item.externalUrl?.trim() || "#";
@@ -236,6 +256,23 @@ export function SiteHeader({
                                 {...(offsite
                                   ? { target: "_blank", rel: "noreferrer" }
                                   : {})}
+                                onClick={closeMenu}
+                              >
+                                {label}
+                              </a>
+                            </li>
+                          );
+                        }
+
+                        if (item.linkType === "file") {
+                          const href = item.fileUrl?.trim() || "#";
+                          return (
+                            <li key={key}>
+                              <a
+                                href={href}
+                                className={menuLinkClass}
+                                target="_blank"
+                                rel="noreferrer"
                                 onClick={closeMenu}
                               >
                                 {label}
@@ -264,7 +301,7 @@ export function SiteHeader({
                   {bottomLink ? (
                     <a
                       href={bottomLink.url!.trim()}
-                      className={`mt-24 block ${bottomLinkClass}`}
+                      className={`mt-6 block ${bottomLinkClass}`}
                       {...(/^https?:\/\//i.test(bottomLink.url!.trim())
                         ? { target: "_blank", rel: "noreferrer" }
                         : {})}

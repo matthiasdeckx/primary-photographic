@@ -24,45 +24,29 @@ export default async function EventsPage() {
     );
   }
 
-  const featured = items.find((i) => i.featured);
-  const rest = featured
-    ? items.filter((i) => i._id !== featured._id)
-    : items;
-
   return (
-    <div className="space-y-14">
+    <div className="space-y-8">
       <h1 className="sr-only">Events</h1>
-
-      {featured ? (
-        <section
-          className="space-y-8 scroll-mt-40"
-          id={listingAnchorId(featured._id)}
-          aria-label="Featured event"
-        >
-          <EventRow item={featured} />
-          <FullBleed>
-            <ImageStrip images={featured.gallery} tall />
-          </FullBleed>
-          <div className="mx-auto max-w-2xl">
-            <PortableBody value={featured.body} alignBlockHeadings="left" />
-          </div>
-        </section>
-      ) : null}
-
-      <div>
-        {rest.length ? (
-          <div data-listing-row-list>
-            {rest.map((item) => (
-              <div
-                key={item._id}
-                id={listingAnchorId(item._id)}
-                className="listing-row-item scroll-mt-40"
-              >
-                <EventRow item={item} />
+      <div className="space-y-0" data-listing-row-list>
+        {items.map((item) => (
+          <details
+            key={item._id}
+            id={listingAnchorId(item._id)}
+            className="listing-row-item scroll-mt-40"
+          >
+            <summary className="group cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+              <EventRow item={item} />
+            </summary>
+            <div className="pb-6 pt-0">
+              <FullBleed>
+                <ImageStrip images={item.gallery} tall />
+              </FullBleed>
+              <div className="mx-auto max-w-2xl">
+                <PortableBody value={item.body} alignBlockHeadings="left" />
               </div>
-            ))}
-          </div>
-        ) : null}
+            </div>
+          </details>
+        ))}
       </div>
     </div>
   );

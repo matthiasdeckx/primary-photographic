@@ -50,6 +50,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       siteTitle={settings?.title}
       footerBody={settings?.footerBody}
       sendFilmUrl={settings?.sendFilmUrl}
+      sendFilmPdfUrl={settings?.sendFilmPdfUrl}
       navigation={navigation}
       homeUtilityHref={homeUtilityHref}
       homeUtilityPrimary={homeUtilityPrimary}

@@ -9,7 +9,6 @@ export const metadata = {
 type ServiceLine = {
   label?: string | null;
   price?: string | null;
-  description?: string | null;
   spaceAbove?: boolean | null;
 };
 
@@ -20,7 +19,6 @@ type ServiceSection = {
   /** @deprecated old flat row — migrated at render time */
   name?: string | null;
   price?: string | null;
-  description?: string | null;
 };
 
 function linesForSection(section: ServiceSection): ServiceLine[] {
@@ -34,7 +32,6 @@ function linesForSection(section: ServiceSection): ServiceLine[] {
     {
       label,
       price: section.price,
-      description: section.description,
     },
   ];
 }
@@ -42,7 +39,8 @@ function linesForSection(section: ServiceSection): ServiceLine[] {
 export default async function ServicesPage() {
   const page = await getServicesPage();
   const sections = page?.services as ServiceSection[] | undefined;
-  const pdf = page?.servicesPdfUrl?.trim();
+  const pdf = page?.servicesPdfFileUrl?.trim() || page?.servicesPdfUrl?.trim();
+  const pdfLabel = page?.servicesPdfLabel?.trim() || "Download PDF";
 
   const hasContent =
     sections?.some((s) => linesForSection(s).length > 0) ?? false;
@@ -83,11 +81,6 @@ export default async function ServicesPage() {
                             </span>
                           ) : null}
                         </div>
-                        {line.description?.trim() ? (
-                          <p className="mt-2 text-[length:var(--text-body)] leading-[1.2em] text-[var(--color-ink)]">
-                            {line.description.trim()}
-                          </p>
-                        ) : null}
                       </div>
                     ))}
                   </div>
@@ -104,12 +97,12 @@ export default async function ServicesPage() {
         {pdf ? (
           <div className="flex justify-center">
             <a
-              className="inline-flex w-full max-w-md items-center justify-center bg-[var(--color-ink)] py-3 text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-white"
+              className="inline-flex h-[58px] w-full max-w-site items-center justify-center bg-[var(--color-ink)] text-[length:var(--text-body)] font-medium uppercase leading-[1.2em] text-white"
               href={pdf}
               target="_blank"
               rel="noreferrer"
             >
-              Download PDF
+              {pdfLabel}
             </a>
           </div>
         ) : null}

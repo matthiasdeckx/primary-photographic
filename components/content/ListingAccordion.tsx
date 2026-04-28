@@ -63,6 +63,7 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
               title={item.title}
               right={item.category?.trim() || ""}
               titleAlign="center"
+              metaTone="mutedInteractive"
               bleedClassName="py-4"
               overlay={
                 <div

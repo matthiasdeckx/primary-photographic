@@ -5,7 +5,8 @@ export const navigationQuery = groq`*[_type == "navigation"][0]{
     label,
     linkType,
     internalPath,
-    externalUrl
+    externalUrl,
+    "fileUrl": file.asset->url
   },
   bottomLink{
     label,
@@ -17,6 +18,7 @@ export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
   title,
   tagline,
   sendFilmUrl,
+  "sendFilmPdfUrl": sendFilmPdf.asset->url,
   homeFeaturedItems[]->{
     _id,
     _type,
@@ -58,18 +60,18 @@ export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
 export const servicesPageQuery = groq`*[_type == "servicesPage"][0]{
   title,
   servicesPdfUrl,
+  "servicesPdfFileUrl": servicesPdfFile.asset->url,
+  servicesPdfLabel,
   sideImages,
   services[]{
     sectionHeading,
     lines[]{
       label,
       price,
-      description,
       spaceAbove
     },
     name,
-    price,
-    description
+    price
   }
 }`;
 

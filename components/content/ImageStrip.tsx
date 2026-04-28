@@ -31,11 +31,13 @@ export function ImageStrip({
     () =>
       (images ?? [])
         .map((img, i) => {
-          const url = urlForImage(img)?.width(1600).url();
-          if (!url) return null;
+          const displayUrl = urlForImage(img)?.width(1600).url();
+          const lightboxUrl = urlForImage(img)?.width(3200).url();
+          if (!displayUrl || !lightboxUrl) return null;
           return {
-            key: img._key || `${url}-${i}`,
-            url,
+            key: img._key || `${displayUrl}-${i}`,
+            url: displayUrl,
+            lightboxUrl,
             blurUrl: blurDataUrlForImage(img),
             alt: img.alt || "",
             caption: img.caption || "",
@@ -235,7 +237,7 @@ export function ImageStrip({
             >
               <div className="relative h-full min-h-[50vh] w-full">
                 <Image
-                  src={usableImages[lightboxIndex].url}
+                  src={usableImages[lightboxIndex].lightboxUrl}
                   alt={usableImages[lightboxIndex].alt}
                   fill
                   sizes="100vw"
@@ -268,7 +270,7 @@ export function ImageStrip({
                   aria-label={`Go to image ${i + 1}`}
                 >
                   <Image
-                    src={img.url}
+                    src={img.lightboxUrl}
                     alt={img.alt}
                     fill
                     sizes="56px"

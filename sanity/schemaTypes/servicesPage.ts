@@ -14,12 +14,6 @@ const serviceLineFields = [
     description: "Optional — shown right-aligned on the same row.",
   }),
   defineField({
-    name: "description",
-    title: "Notes",
-    type: "text",
-    rows: 3,
-  }),
-  defineField({
     name: "spaceAbove",
     title: "Extra space above",
     type: "boolean",
@@ -44,7 +38,22 @@ export const servicesPage = defineType({
       name: "servicesPdfUrl",
       title: "Price PDF",
       type: "url",
-      description: "Optional link for “Download PDF” on the site.",
+      description: "Legacy fallback URL. Prefer uploading the PDF below.",
+    }),
+    defineField({
+      name: "servicesPdfFile",
+      title: "Price PDF file",
+      type: "file",
+      description: "Upload the PDF used by the services page button.",
+      options: {
+        accept: "application/pdf",
+      },
+    }),
+    defineField({
+      name: "servicesPdfLabel",
+      title: "PDF button label",
+      type: "string",
+      description: "Text shown inside the PDF button.",
     }),
     defineField({
       name: "services",
@@ -56,6 +65,9 @@ export const servicesPage = defineType({
         {
           type: "object",
           name: "serviceSection",
+          options: {
+            modal: { type: "popover" },
+          },
           fields: [
             defineField({
               name: "sectionHeading",
@@ -73,6 +85,9 @@ export const servicesPage = defineType({
                 {
                   type: "object",
                   name: "serviceLine",
+                  options: {
+                    modal: { type: "popover" },
+                  },
                   fields: serviceLineFields,
                   preview: {
                     select: {

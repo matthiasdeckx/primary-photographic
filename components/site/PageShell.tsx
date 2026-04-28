@@ -11,6 +11,7 @@ type Props = {
   siteTitle?: string | null;
   footerBody?: PortableTextBlock[] | null;
   sendFilmUrl?: string | null;
+  sendFilmPdfUrl?: string | null;
   navigation?: NavigationPayload | null;
   homeUtilityHref?: string | null;
   homeUtilityPrimary?: string | null;
@@ -29,6 +30,7 @@ export function PageShell({
   siteTitle,
   footerBody,
   sendFilmUrl,
+  sendFilmPdfUrl,
   navigation,
   homeUtilityHref,
   homeUtilityPrimary,
@@ -46,6 +48,7 @@ export function PageShell({
       <SiteHeader
         siteTitle={siteTitle}
         sendFilmUrl={sendFilmUrl}
+        sendFilmPdfUrl={sendFilmPdfUrl}
         navigation={navigation}
         homeUtilityHref={homeUtilityHref}
         homeUtilityPrimary={homeUtilityPrimary}

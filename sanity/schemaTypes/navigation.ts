@@ -1,9 +1,26 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
+const INTERNAL_ROUTE_OPTIONS = [
+  { title: "Home (/)", value: "/" },
+  { title: "About (/about)", value: "/about" },
+  { title: "Services (/services)", value: "/services" },
+  { title: "Events (/events)", value: "/events" },
+  { title: "Commissions (/commissions)", value: "/commissions" },
+  { title: "Technical info (/technical-info)", value: "/technical-info" },
+];
+
 export const navigation = defineType({
   name: "navigation",
   title: "Menu",
   type: "document",
+  preview: {
+    prepare() {
+      return {
+        title: "Menu",
+        subtitle: "Primary site navigation",
+      };
+    },
+  },
   fields: [
     defineField({
       name: "items",
@@ -29,6 +46,7 @@ export const navigation = defineType({
                 list: [
                   { title: "Page on this site", value: "internal" },
                   { title: "External URL", value: "external" },
+                  { title: "Uploaded file", value: "file" },
                 ],
                 layout: "radio",
                 direction: "horizontal",
@@ -37,17 +55,22 @@ export const navigation = defineType({
             }),
             defineField({
               name: "internalPath",
-              title: "Path",
+              title: "Page",
               type: "string",
-              description: "Must start with / (e.g. /services).",
+              description: "Select a page on this site.",
+              options: {
+                list: INTERNAL_ROUTE_OPTIONS,
+              },
               hidden: ({ parent }) => parent?.linkType !== "internal",
               validation: (Rule) =>
                 Rule.custom((val, context) => {
                   const parent = context.parent as { linkType?: string };
                   if (parent?.linkType !== "internal") return true;
                   if (!val || typeof val !== "string")
-                    return "Required for internal links";
-                  if (!val.startsWith("/")) return "Path must start with /";
+                    return "Select a page";
+                  if (!INTERNAL_ROUTE_OPTIONS.some((route) => route.value === val)) {
+                    return "Select one of the available pages";
+                  }
                   return true;
                 }),
             }),
@@ -63,6 +86,18 @@ export const navigation = defineType({
                   return val ? true : "Required for external links";
                 }),
             }),
+            defineField({
+              name: "file",
+              title: "File",
+              type: "file",
+              hidden: ({ parent }) => parent?.linkType !== "file",
+              validation: (Rule) =>
+                Rule.custom((val, context) => {
+                  const parent = context.parent as { linkType?: string };
+                  if (parent?.linkType !== "file") return true;
+                  return val ? true : "Required for file links";
+                }),
+            }),
           ],
           preview: {
             select: {
@@ -70,12 +105,17 @@ export const navigation = defineType({
               linkType: "linkType",
               internalPath: "internalPath",
               externalUrl: "externalUrl",
+              fileUrl: "file.asset.url",
             },
-            prepare({ title, linkType, internalPath, externalUrl }) {
+            prepare({ title, linkType, internalPath, externalUrl, fileUrl }) {
               return {
                 title: title || "Link",
                 subtitle:
-                  linkType === "external" ? externalUrl || "" : internalPath || "",
+                  linkType === "external"
+                    ? externalUrl || ""
+                    : linkType === "file"
+                      ? fileUrl || ""
+                      : internalPath || "",
               };
             },
           },

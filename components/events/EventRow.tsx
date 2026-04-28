@@ -26,6 +26,7 @@ export function EventRow({ item }: { item: EventListItem }) {
       title={item.title}
       right={type}
       titleAlign="center"
+      metaTone="mutedInteractive"
       bleedClassName="py-3"
     />
   );

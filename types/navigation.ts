@@ -1,8 +1,9 @@
 export type SanityMenuLink = {
   label?: string | null;
-  linkType?: "internal" | "external" | null;
+  linkType?: "internal" | "external" | "file" | null;
   internalPath?: string | null;
   externalUrl?: string | null;
+  fileUrl?: string | null;
 };
 
 export type SanityBottomLink = {
