@@ -109,53 +109,99 @@ export function SiteFooter({
   return (
     <footer
       ref={footerRef}
-      className="fixed inset-x-0 bottom-0 z-40"
+      className="relative z-40 lg:fixed lg:inset-x-0 lg:bottom-0"
       data-site-footer
     >
-      <div className="relative w-full px-4 pb-4 pt-10">
-        <div className="pointer-events-none absolute inset-x-0 bottom-4 grid grid-cols-[1fr_auto] items-end px-4">
-          <div className="pointer-events-auto justify-self-start">
-            <LabClock schedule={labClockSchedule} />
-          </div>
-          <div className="pointer-events-auto justify-self-end text-[length:var(--text-small)] uppercase leading-[1.2em] text-right">
-            {newsletterOpen && newsletterState === "success" ? (
-              <p className="text-[var(--color-ink)]">{newsletterMessage}</p>
-            ) : newsletterOpen ? (
+      <div
+        className="relative w-full px-4 lg:pt-10"
+        style={{
+          paddingTop: "calc(1rem * var(--space-scale, 1))",
+          paddingBottom: "calc(1rem * var(--space-scale, 1))",
+        }}
+      >
+        <div className="mx-auto w-full max-w-site lg:max-w-none">
+          <div className="mx-auto w-full max-w-3xl lg:max-w-none">
+            <div
+              className="pointer-events-none mb-4 grid w-full grid-cols-1 items-end gap-y-2 lg:absolute lg:inset-x-0 lg:bottom-4 lg:mb-0 lg:grid-cols-[1fr_auto] lg:gap-y-0 lg:px-4"
+              style={{
+                gap: "calc(1rem * var(--space-scale, 1))",
+              }}
+            >
+              <div className="pointer-events-auto w-full justify-self-start">
+                <LabClock schedule={labClockSchedule} />
+              </div>
+              <div className="pointer-events-auto w-full justify-self-end text-[length:var(--text-small)] uppercase leading-[1.2em] text-left lg:w-auto lg:text-right">
+                <div className="lg:hidden">
               <form
-                className="flex items-baseline gap-4"
+                className="flex w-full items-baseline"
+                style={{ gap: "calc(1rem * var(--space-scale, 1))" }}
                 onSubmit={submitNewsletter}
               >
                 <input
-                  ref={newsletterInputRef}
                   type="email"
                   name="EMAIL"
                   required
                   placeholder="Email Address"
                   aria-label="Email Address"
-                  className="w-[11rem] bg-transparent text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-ink)] placeholder:uppercase placeholder:text-[var(--color-muted)] focus:outline-none"
+                  className="w-full bg-transparent text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-ink)] placeholder:uppercase placeholder:text-[var(--color-muted)] focus:outline-none"
                 />
                 <button
                   type="submit"
                   disabled={newsletterState === "submitting"}
-                  className="cursor-pointer uppercase text-[var(--color-ink)] hover:opacity-60 disabled:opacity-40"
+                  className="cursor-pointer whitespace-nowrap uppercase text-[var(--color-ink)] hover:opacity-60 disabled:opacity-40"
                 >
                   {newsletterState === "submitting" ? "Submitting" : "Subscribe"}
                 </button>
-                {newsletterState === "error" && newsletterMessage ? (
-                  <p className="normal-case text-[var(--color-muted)]">
-                    {newsletterMessage}
-                  </p>
-                ) : null}
               </form>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setNewsletterOpen(true)}
-                className="cursor-pointer uppercase text-[var(--color-ink)] hover:opacity-60"
-              >
-                Newsletter
-              </button>
-            )}
+              {newsletterState !== "idle" && newsletterMessage ? (
+                <p className="mt-1 normal-case text-[var(--color-muted)]">
+                  {newsletterMessage}
+                </p>
+              ) : null}
+                </div>
+                <div className="hidden lg:block">
+                  {newsletterOpen && newsletterState === "success" ? (
+                    <p className="text-[var(--color-ink)]">{newsletterMessage}</p>
+                  ) : newsletterOpen ? (
+                    <form
+                      className="flex items-baseline"
+                      style={{ gap: "calc(1rem * var(--space-scale, 1))" }}
+                      onSubmit={submitNewsletter}
+                    >
+                      <input
+                        ref={newsletterInputRef}
+                        type="email"
+                        name="EMAIL"
+                        required
+                        placeholder="Email Address"
+                        aria-label="Email Address"
+                        className="w-[11rem] bg-transparent text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-ink)] placeholder:uppercase placeholder:text-[var(--color-muted)] focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        disabled={newsletterState === "submitting"}
+                        className="cursor-pointer uppercase text-[var(--color-ink)] hover:opacity-60 disabled:opacity-40"
+                      >
+                        {newsletterState === "submitting" ? "Submitting" : "Subscribe"}
+                      </button>
+                      {newsletterState === "error" && newsletterMessage ? (
+                        <p className="normal-case text-[var(--color-muted)]">
+                          {newsletterMessage}
+                        </p>
+                      ) : null}
+                    </form>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setNewsletterOpen(true)}
+                      className="cursor-pointer uppercase text-[var(--color-ink)] hover:opacity-60"
+                    >
+                      Newsletter
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -231,9 +277,12 @@ export function SiteFooter({
         {(footerAddressLeft || footerAddressRight) && (
           <div className="mx-auto mt-0 w-full max-w-site">
             <div className="mx-auto w-full max-w-3xl">
-              <div className="grid w-full gap-3 text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)] sm:grid-cols-2">
+              <div
+                className="flex w-full items-baseline justify-between text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]"
+                style={{ gap: "calc(1rem * var(--space-scale, 1))" }}
+              >
                 <p className="text-left">{footerAddressLeft || "\u00a0"}</p>
-                <p className="text-left sm:text-right">{footerAddressRight || "\u00a0"}</p>
+                <p className="text-right">{footerAddressRight || "\u00a0"}</p>
               </div>
             </div>
           </div>

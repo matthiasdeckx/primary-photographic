@@ -1,3 +1,4 @@
+import { ExclusiveDetailsBehavior } from "@/components/content/ExclusiveDetailsBehavior";
 import { PortableBody } from "@/components/content/PortableBody";
 import { ImageStrip } from "@/components/content/ImageStrip";
 import { EventRow } from "@/components/events/EventRow";
@@ -27,7 +28,12 @@ export default async function EventsPage() {
   return (
     <div className="space-y-8">
       <h1 className="sr-only">Events</h1>
-      <div className="space-y-0" data-listing-row-list>
+      <ExclusiveDetailsBehavior rootSelector="[data-events-accordion]" />
+      <div
+        className="space-y-0"
+        data-listing-row-list
+        data-events-accordion
+      >
         {items.map((item) => (
           <details
             key={item._id}
@@ -37,7 +43,7 @@ export default async function EventsPage() {
             <summary className="group cursor-pointer list-none [&::-webkit-details-marker]:hidden">
               <EventRow item={item} />
             </summary>
-            <div className="pb-6 pt-0">
+            <div className="pb-8 pt-0">
               <FullBleed>
                 <ImageStrip images={item.gallery} tall />
               </FullBleed>

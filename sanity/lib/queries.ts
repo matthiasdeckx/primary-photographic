@@ -99,6 +99,14 @@ export const aboutPageQuery = groq`*[_type == "aboutPage"][0]{
   }
 }`;
 
+export const sendUsFilmPageQuery = groq`*[_type == "sendUsFilmPage"][0]{
+  title,
+  body,
+  buttonLabel,
+  "buttonFileUrl": buttonFile.asset->url,
+  buttonUrl
+}`;
+
 export const eventItemsQuery = groq`*[_type == "eventItem"] | order(coalesce(eventDateFrom, eventDate) desc, _createdAt desc){
   _id,
   title,

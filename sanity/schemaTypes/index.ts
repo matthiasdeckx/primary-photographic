@@ -10,6 +10,7 @@ import { navigation } from "@/sanity/schemaTypes/navigation";
 import { pageSection } from "@/sanity/schemaTypes/pageSection";
 import { technicalInfoPage } from "@/sanity/schemaTypes/technicalInfoPage";
 import { servicesPage } from "@/sanity/schemaTypes/servicesPage";
+import { sendUsFilmPage } from "@/sanity/schemaTypes/sendUsFilmPage";
 
 export const schemaTypes: SchemaTypeDefinition[] = [
   blockContent,
@@ -19,6 +20,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   navigation,
   technicalInfoPage,
   servicesPage,
+  sendUsFilmPage,
   aboutPage,
   eventItem,
   commissionItem,

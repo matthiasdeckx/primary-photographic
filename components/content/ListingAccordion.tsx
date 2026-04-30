@@ -3,6 +3,7 @@
 import type { PortableTextBlock } from "@portabletext/types";
 import { useEffect } from "react";
 
+import { ExclusiveDetailsBehavior } from "@/components/content/ExclusiveDetailsBehavior";
 import { ImageStrip } from "@/components/content/ImageStrip";
 import { PortableBody } from "@/components/content/PortableBody";
 import { ListingBanner } from "@/components/listing/ListingBanner";
@@ -50,7 +51,12 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
   }
 
   return (
-    <div className="space-y-0" data-listing-row-list>
+    <div
+      className="space-y-0"
+      data-listing-row-list
+      data-commissions-accordion
+    >
+      <ExclusiveDetailsBehavior rootSelector="[data-commissions-accordion]" />
       {items.map((item) => (
         <details
           key={item._id}
@@ -82,7 +88,7 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
               }
             />
           </summary>
-          <div className="pb-6 pt-0">
+          <div className="pb-8 pt-0">
             <FullBleed>
               <ImageStrip images={item.gallery} />
             </FullBleed>

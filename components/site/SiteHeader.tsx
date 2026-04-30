@@ -166,7 +166,13 @@ export function SiteHeader({
   return (
     <header className="fixed inset-x-0 top-0 z-50 w-full">
       {/* Does not reserve layout height — menu sits high; utility links stay tappable in the corners. */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex items-start justify-between gap-4 px-4 pt-4">
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex items-start justify-between px-4"
+        style={{
+          gap: "calc(1rem * var(--space-scale, 1))",
+          paddingTop: "calc(1rem * var(--space-scale, 1))",
+        }}
+      >
         <Link
           href={liveUtility.href}
           className="group pointer-events-auto min-w-0 shrink text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]"
@@ -197,14 +203,22 @@ export function SiteHeader({
 
       <div
         ref={chromeRef}
-        className={`relative z-50 flex w-full flex-col gap-2 px-4 pt-2 ${menuOpen ? "pb-0" : "pb-4"}`}
+        className={`relative z-50 flex w-full flex-col px-4 ${menuOpen ? "pb-0" : ""}`}
+        style={{
+          gap: "calc(0.5rem * var(--space-scale, 1))",
+          paddingTop: "calc(0.5rem * var(--space-scale, 1))",
+          paddingBottom: menuOpen
+            ? "0px"
+            : "calc(1rem * var(--space-scale, 1))",
+        }}
       >
         <div className="mx-auto w-full max-w-site">
           <div className="flex justify-center">
             <div className="relative w-full bg-[var(--color-ink)] text-white">
               <button
                 type="button"
-                className="flex h-[58px] w-full cursor-pointer items-center justify-center bg-[var(--color-ink)] text-[length:var(--text-body)] font-medium uppercase leading-[1.2em] text-white"
+                className="flex w-full cursor-pointer items-center justify-center bg-[var(--color-ink)] text-[length:var(--text-body)] font-medium uppercase leading-[1.2em] text-white"
+                style={{ height: "calc(58px * var(--space-scale, 1))" }}
                 aria-expanded={menuOpen}
                 aria-controls="primary-menu-panel"
                 id="primary-menu-toggle"
@@ -217,7 +231,11 @@ export function SiteHeader({
               {menuOpen ? (
                 <div
                   id="primary-menu-panel"
-                  className="absolute inset-x-0 top-full z-10 bg-[var(--color-ink)] px-4 pb-4 pt-4 text-white"
+                  className="absolute inset-x-0 top-full z-10 bg-[var(--color-ink)] px-4 text-white"
+                  style={{
+                    paddingTop: "calc(1rem * var(--space-scale, 1))",
+                    paddingBottom: "calc(1rem * var(--space-scale, 1))",
+                  }}
                 >
                   <nav aria-label="Primary" className="py-4">
                     <ul
@@ -302,6 +320,7 @@ export function SiteHeader({
                     <a
                       href={bottomLink.url!.trim()}
                       className={`mt-6 block ${bottomLinkClass}`}
+                      style={{ marginTop: "calc(1.5rem * var(--space-scale, 1))" }}
                       {...(/^https?:\/\//i.test(bottomLink.url!.trim())
                         ? { target: "_blank", rel: "noreferrer" }
                         : {})}

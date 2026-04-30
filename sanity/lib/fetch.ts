@@ -4,6 +4,7 @@ import {
   commissionItemsQuery,
   eventItemsQuery,
   navigationQuery,
+  sendUsFilmPageQuery,
   servicesPageQuery,
   siteSettingsQuery,
   technicalInfoPageQuery,
@@ -35,6 +36,11 @@ export async function getTechnicalInfoPage() {
 export async function getAboutPage() {
   if (!client) return null;
   return client.fetch(aboutPageQuery, {}, fetchOptions);
+}
+
+export async function getSendUsFilmPage() {
+  if (!client) return null;
+  return client.fetch(sendUsFilmPageQuery, {}, fetchOptions);
 }
 
 export async function getEventItems() {

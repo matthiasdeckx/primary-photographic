@@ -7,6 +7,7 @@ const INTERNAL_ROUTE_OPTIONS = [
   { title: "Events (/events)", value: "/events" },
   { title: "Commissions (/commissions)", value: "/commissions" },
   { title: "Technical info (/technical-info)", value: "/technical-info" },
+  { title: "Send us film (/send-us-film)", value: "/send-us-film" },
 ];
 
 export const navigation = defineType({

@@ -36,8 +36,8 @@ export function ListingBanner({
   const titleAlignClass =
     titleAlign === "center" ? "text-center" : "text-left";
   const grid = end
-    ? "grid grid-cols-[1fr_minmax(0,2.5fr)_1fr_auto] items-baseline gap-x-4"
-    : "grid grid-cols-[1fr_minmax(0,2.5fr)_1fr] items-baseline gap-x-4";
+    ? "grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-baseline gap-x-2 sm:gap-x-3 md:grid-cols-[1fr_minmax(0,2.5fr)_1fr_auto] md:gap-x-4"
+    : "grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2 sm:gap-x-3 md:grid-cols-[1fr_minmax(0,2.5fr)_1fr] md:gap-x-4";
   const metaClass =
     metaTone === "mutedInteractive"
       ? "text-[var(--color-muted)] group-hover:text-[var(--color-ink)] group-focus-within:text-[var(--color-ink)] [details[open]_&]:text-[var(--color-ink)]"

@@ -44,7 +44,7 @@ export function PageShell({
   labClockSchedule,
 }: Props) {
   return (
-    <>
+    <div className="flex min-h-dvh flex-col">
       <SiteHeader
         siteTitle={siteTitle}
         sendFilmUrl={sendFilmUrl}
@@ -55,10 +55,11 @@ export function PageShell({
         homeUtilitySecondary={homeUtilitySecondary}
       />
       <div
-        className="w-full px-4"
+        className="w-full flex-1 px-4 lg:pb-[calc(var(--site-footer-height,260px)+1rem)]"
         style={{
-          paddingTop: "calc(var(--site-header-height, 280px) + 2.5rem)",
-          paddingBottom: "calc(var(--site-footer-height, 260px) + 1rem)",
+          paddingTop:
+            "calc(var(--site-header-height, 280px) + (2.5rem * var(--space-scale, 1)))",
+          paddingBottom: "calc(1.5rem * var(--space-scale, 1))",
         }}
       >
         <div className="mx-auto w-full max-w-site flex-1">
@@ -76,6 +77,6 @@ export function PageShell({
         hours={hours}
         labClockSchedule={labClockSchedule}
       />
-    </>
+    </div>
   );
 }

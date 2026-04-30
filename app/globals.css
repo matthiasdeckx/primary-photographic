@@ -30,6 +30,40 @@
   --text-body: 26px;
   --text-small: 13px;
   --leading: 1.2;
+  --space-scale: 1;
+}
+
+@media (max-width: 540px) {
+  :root {
+    --text-body: 24px !important;
+    --space-scale: 0.92;
+  }
+  html,
+  body {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --text-body: 21px !important;
+    --space-scale: 0.84;
+  }
+  html,
+  body {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 340px) {
+  :root {
+    --text-body: 20px !important;
+    --space-scale: 0.76;
+  }
+  html,
+  body {
+    font-size: 20px;
+  }
 }
 
 @theme inline {

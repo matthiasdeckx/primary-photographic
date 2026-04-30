@@ -33,6 +33,14 @@ export const structure: StructureResolver = (S, context) =>
         .title("About page")
         .id("aboutPage")
         .child(S.document().schemaType("aboutPage").documentId("aboutPage")),
+      S.listItem()
+        .title("Send us film page")
+        .id("sendUsFilmPage")
+        .child(
+          S.document()
+            .schemaType("sendUsFilmPage")
+            .documentId("sendUsFilmPage"),
+        ),
       S.divider(),
       S.listItem()
         .title("Events")
