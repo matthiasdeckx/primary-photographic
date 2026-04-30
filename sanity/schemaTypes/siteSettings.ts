@@ -36,7 +36,7 @@ export const siteSettings = defineType({
       title: "Homepage featured source documents",
       type: "array",
       description:
-        "Select one or more Events/Commissions. Homepage spotlight text/images are pulled automatically from the first selected item.",
+        "Select one or more Events/Commissions. Used when no custom homepage features are defined below.",
       validation: (Rule) => Rule.min(1).warning("Select at least one featured item."),
       of: [
         defineField({
@@ -44,6 +44,71 @@ export const siteSettings = defineType({
           title: "Homepage featured reference",
           type: "reference",
           to: [{ type: "eventItem" }, { type: "commissionItem" }],
+        }),
+      ],
+    }),
+    defineField({
+      name: "homeCustomFeatures",
+      title: "Homepage custom features",
+      type: "array",
+      description:
+        "Optional manual homepage slides. If set, these are used instead of Homepage featured source documents.",
+      of: [
+        defineField({
+          name: "homeCustomFeature",
+          title: "Homepage custom feature",
+          type: "object",
+          fields: [
+            defineField({
+              name: "title",
+              title: "Title",
+              type: "string",
+            }),
+            defineField({
+              name: "meta",
+              title: "Meta text",
+              type: "string",
+              description: "Small secondary text shown next to title in top-left utility.",
+            }),
+            defineField({
+              name: "href",
+              title: "Link URL",
+              type: "string",
+              description: "Optional target for top-left click (e.g. /events or external URL).",
+            }),
+            defineField({
+              name: "images",
+              title: "Images",
+              type: "array",
+              validation: (Rule) => Rule.max(5).warning("Use up to 5 images."),
+              of: [
+                defineField({
+                  name: "featureImage",
+                  type: "image",
+                  options: { hotspot: true },
+                  fields: [
+                    defineField({
+                      name: "alt",
+                      type: "string",
+                      title: "Alternative text",
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+          preview: {
+            select: {
+              title: "title",
+              subtitle: "meta",
+            },
+            prepare({ title, subtitle }) {
+              return {
+                title: title || "Custom feature",
+                subtitle: subtitle || "",
+              };
+            },
+          },
         }),
       ],
     }),

@@ -6,17 +6,17 @@ export const eventItem = defineType({
   type: "document",
   orderings: [
     {
-      title: "Date (earliest first)",
-      name: "eventDateAsc",
+      title: "Date (latest first)",
+      name: "eventDateDesc",
       by: [
-        { field: "eventDateFrom", direction: "asc" },
+        { field: "eventDateFrom", direction: "desc" },
         { field: "_createdAt", direction: "desc" },
       ],
     },
     {
-      title: "Date (latest first)",
-      name: "eventDateDesc",
-      by: [{ field: "eventDateFrom", direction: "desc" }],
+      title: "Date (earliest first)",
+      name: "eventDateAsc",
+      by: [{ field: "eventDateFrom", direction: "asc" }],
     },
   ],
   fields: [

@@ -2,7 +2,7 @@
 
 import type { PortableTextBlock } from "@portabletext/types";
 import Link from "next/link";
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { PortableBody } from "@/components/content/PortableBody";
 import { LabClock } from "@/components/site/LabClock";
@@ -33,6 +33,12 @@ export function SiteFooter({
 }: Props) {
   const name = (siteTitle?.trim() || "PRIMARY PHOTOGRAPHIC").toUpperCase();
   const footerRef = useRef<HTMLElement>(null);
+  const newsletterInputRef = useRef<HTMLInputElement>(null);
+  const [newsletterOpen, setNewsletterOpen] = useState(false);
+  const [newsletterState, setNewsletterState] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
+  const [newsletterMessage, setNewsletterMessage] = useState("");
 
   useLayoutEffect(() => {
     const el = footerRef.current;
@@ -58,6 +64,48 @@ export function SiteFooter({
     };
   }, []);
 
+  useEffect(() => {
+    if (!newsletterOpen) return;
+    newsletterInputRef.current?.focus();
+  }, [newsletterOpen]);
+
+  const submitNewsletter = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (newsletterState === "submitting") return;
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("EMAIL") || "").trim();
+    if (!email) {
+      setNewsletterState("error");
+      setNewsletterMessage("Please enter an email address.");
+      return;
+    }
+
+    setNewsletterState("submitting");
+    setNewsletterMessage("");
+
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = (await response.json()) as { ok?: boolean; message?: string };
+
+      if (response.ok && data.ok) {
+        setNewsletterState("success");
+        setNewsletterMessage("Thank you for subscribing.");
+        return;
+      }
+
+      setNewsletterState("error");
+      setNewsletterMessage(data.message || "Subscription failed. Please try again.");
+    } catch {
+      setNewsletterState("error");
+      setNewsletterMessage("Subscription failed. Please try again.");
+    }
+  };
+
   return (
     <footer
       ref={footerRef}
@@ -70,14 +118,44 @@ export function SiteFooter({
             <LabClock schedule={labClockSchedule} />
           </div>
           <div className="pointer-events-auto justify-self-end text-[length:var(--text-small)] uppercase leading-[1.2em] text-right">
-            <div className="flex items-baseline gap-4">
-              <a className="text-[var(--color-ink)] hover:opacity-80" href={email ? `mailto:${email}` : "#"}>
-                Email address
-              </a>
-              <a className="text-[var(--color-ink)] hover:opacity-80" href="#">
-                Subscribe
-              </a>
-            </div>
+            {newsletterOpen && newsletterState === "success" ? (
+              <p className="text-[var(--color-ink)]">{newsletterMessage}</p>
+            ) : newsletterOpen ? (
+              <form
+                className="flex items-baseline gap-4"
+                onSubmit={submitNewsletter}
+              >
+                <input
+                  ref={newsletterInputRef}
+                  type="email"
+                  name="EMAIL"
+                  required
+                  placeholder="Email Address"
+                  aria-label="Email Address"
+                  className="w-[11rem] bg-transparent text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-ink)] placeholder:uppercase placeholder:text-[var(--color-muted)] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={newsletterState === "submitting"}
+                  className="cursor-pointer uppercase text-[var(--color-ink)] hover:opacity-60 disabled:opacity-40"
+                >
+                  {newsletterState === "submitting" ? "Submitting" : "Subscribe"}
+                </button>
+                {newsletterState === "error" && newsletterMessage ? (
+                  <p className="normal-case text-[var(--color-muted)]">
+                    {newsletterMessage}
+                  </p>
+                ) : null}
+              </form>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setNewsletterOpen(true)}
+                className="cursor-pointer uppercase text-[var(--color-ink)] hover:opacity-60"
+              >
+                Newsletter
+              </button>
+            )}
           </div>
         </div>
 
@@ -92,7 +170,7 @@ export function SiteFooter({
               </div>
             ) : (
               <p className="mx-auto max-w-3xl text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-muted)]">
-                <Link href="/" className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-2 hover:opacity-80">
+                <Link href="/" className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-2 hover:opacity-60">
                   {name}
                 </Link>{" "}
                 is a high-end

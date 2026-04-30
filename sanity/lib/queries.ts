@@ -19,6 +19,12 @@ export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
   tagline,
   sendFilmUrl,
   "sendFilmPdfUrl": sendFilmPdf.asset->url,
+  homeCustomFeatures[]{
+    title,
+    meta,
+    href,
+    images
+  },
   homeFeaturedItems[]->{
     _id,
     _type,
@@ -93,7 +99,7 @@ export const aboutPageQuery = groq`*[_type == "aboutPage"][0]{
   }
 }`;
 
-export const eventItemsQuery = groq`*[_type == "eventItem"] | order(coalesce(eventDateFrom, eventDate) asc, _createdAt desc){
+export const eventItemsQuery = groq`*[_type == "eventItem"] | order(coalesce(eventDateFrom, eventDate) desc, _createdAt desc){
   _id,
   title,
   eyebrow,

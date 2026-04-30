@@ -48,6 +48,7 @@ export function ImageStrip({
   );
 
   if (!usableImages.length) return null;
+  const isSingleImage = usableImages.length === 1;
 
   const frameHeightClass = tall ? "h-[400px]" : "h-[400px]";
 
@@ -162,49 +163,88 @@ export function ImageStrip({
 
   return (
     <>
-      <div
-        ref={scrollerRef}
-        className="mt-6 -mx-1 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        <div className="flex w-max gap-3 px-1">
-          {usableImages.map((img, i) => (
-            <figure key={img.key} className="flex shrink-0 flex-col items-center">
-              <button
-                type="button"
-                className="shrink-0 cursor-zoom-in bg-black/5"
-                onClick={() => openLightbox(i)}
-                aria-label={`Open image ${i + 1} in lightbox`}
-              >
-                <img
-                  src={img.url}
-                  alt={img.alt}
-                  loading="lazy"
-                  onLoad={() =>
-                    setLoadedKeys((prev) => ({ ...prev, [img.key]: true }))
-                  }
-                  className={`${frameHeightClass} block w-auto max-w-none object-contain transition-opacity duration-300 ${
-                    loadedKeys[img.key] ? "opacity-100" : "opacity-0"
-                  }`}
-                  style={
-                    !loadedKeys[img.key] && img.blurUrl
-                      ? {
-                          backgroundImage: `url(${img.blurUrl})`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                        }
-                      : undefined
-                  }
-                />
-              </button>
-              {img.caption ? (
-                <figcaption className="mt-2 max-w-[22rem] text-left text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
-                  {img.caption}
-                </figcaption>
-              ) : null}
-            </figure>
-          ))}
+      {isSingleImage ? (
+        <div className="mt-6 flex justify-center">
+          <figure className="flex flex-col items-center">
+            <button
+              type="button"
+              className="cursor-zoom-in bg-black/5"
+              onClick={() => openLightbox(0)}
+              aria-label="Open image in lightbox"
+            >
+              <img
+                src={usableImages[0].url}
+                alt={usableImages[0].alt}
+                loading="lazy"
+                onLoad={() =>
+                  setLoadedKeys((prev) => ({ ...prev, [usableImages[0].key]: true }))
+                }
+                className={`${frameHeightClass} block w-auto max-w-full object-contain transition-opacity duration-300 ${
+                  loadedKeys[usableImages[0].key] ? "opacity-100" : "opacity-0"
+                }`}
+                style={
+                  !loadedKeys[usableImages[0].key] && usableImages[0].blurUrl
+                    ? {
+                        backgroundImage: `url(${usableImages[0].blurUrl})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }
+                    : undefined
+                }
+              />
+            </button>
+            {usableImages[0].caption ? (
+              <figcaption className="mt-2 max-w-[22rem] text-left text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
+                {usableImages[0].caption}
+              </figcaption>
+            ) : null}
+          </figure>
         </div>
-      </div>
+      ) : (
+        <div
+          ref={scrollerRef}
+          className="mt-6 -mx-1 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <div className="flex w-max gap-3 px-1">
+            {usableImages.map((img, i) => (
+              <figure key={img.key} className="flex shrink-0 flex-col items-center">
+                <button
+                  type="button"
+                  className="shrink-0 cursor-zoom-in bg-black/5"
+                  onClick={() => openLightbox(i)}
+                  aria-label={`Open image ${i + 1} in lightbox`}
+                >
+                  <img
+                    src={img.url}
+                    alt={img.alt}
+                    loading="lazy"
+                    onLoad={() =>
+                      setLoadedKeys((prev) => ({ ...prev, [img.key]: true }))
+                    }
+                    className={`${frameHeightClass} block w-auto max-w-none object-contain transition-opacity duration-300 ${
+                      loadedKeys[img.key] ? "opacity-100" : "opacity-0"
+                    }`}
+                    style={
+                      !loadedKeys[img.key] && img.blurUrl
+                        ? {
+                            backgroundImage: `url(${img.blurUrl})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                          }
+                        : undefined
+                    }
+                  />
+                </button>
+                {img.caption ? (
+                  <figcaption className="mt-2 max-w-[22rem] text-left text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
+                    {img.caption}
+                  </figcaption>
+                ) : null}
+              </figure>
+            ))}
+          </div>
+        </div>
+      )}
 
       {lightboxIndex !== null ? (
         <div

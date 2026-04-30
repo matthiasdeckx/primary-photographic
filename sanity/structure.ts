@@ -41,7 +41,7 @@ export const structure: StructureResolver = (S, context) =>
           S.documentTypeList("eventItem")
             .title("Events")
             .defaultOrdering([
-              { field: "eventDateFrom", direction: "asc" },
+              { field: "eventDateFrom", direction: "desc" },
               { field: "_createdAt", direction: "desc" },
             ]),
         ),

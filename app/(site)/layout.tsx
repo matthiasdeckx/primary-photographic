@@ -10,6 +10,16 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     getSiteSettings(),
     getNavigation(),
   ]);
+  const customFeatures = Array.isArray(settings?.homeCustomFeatures)
+    ? settings.homeCustomFeatures
+    : [];
+  const firstCustom = customFeatures[0] as
+    | {
+        title?: string | null;
+        meta?: string | null;
+        href?: string | null;
+      }
+    | undefined;
   const featuredItems = Array.isArray(settings?.homeFeaturedItems)
     ? settings.homeFeaturedItems
     : [];
@@ -27,14 +37,14 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       }
     | undefined;
   const selectedAnchorId = listingAnchorId(selected?._id || undefined);
-  const homeUtilityHref = selected?._type
+  const sourceUtilityHref = selected?._type
     ? selected._type === "eventItem"
       ? `/events#${selectedAnchorId}`
       : `/commissions#${selectedAnchorId}`
     : "/";
-  const homeUtilityPrimary =
+  const sourceUtilityPrimary =
     selected?.title?.trim() || settings?.homeSpotlightLeft?.trim() || "";
-  const homeUtilitySecondary =
+  const sourceUtilitySecondary =
     (selected?._type === "eventItem"
       ? formatEventDateRange(selected.eventDateFrom, selected.eventDateTo) ||
         (selected.eventDateFrom || selected.eventDate
@@ -44,6 +54,9 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       : selected?.category?.trim() || selected?.eyebrow?.trim()) ||
     settings?.homeSpotlightRight?.trim() ||
     "";
+  const homeUtilityHref = firstCustom?.href?.trim() || sourceUtilityHref;
+  const homeUtilityPrimary = firstCustom?.title?.trim() || sourceUtilityPrimary;
+  const homeUtilitySecondary = firstCustom?.meta?.trim() || sourceUtilitySecondary;
 
   return (
     <PageShell

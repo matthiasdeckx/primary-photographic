@@ -22,10 +22,57 @@ type HomeFeatureSource = {
 export default async function HomePage() {
   const settings = await getSiteSettings();
 
+  const customFeatures = Array.isArray(settings?.homeCustomFeatures)
+    ? settings.homeCustomFeatures
+    : [];
   const featuredItems: HomeFeatureSource[] = Array.isArray(settings?.homeFeaturedItems)
     ? settings.homeFeaturedItems
     : [];
-  const slides: HomeFeatureSlide[] = featuredItems
+  const customSlides: HomeFeatureSlide[] = customFeatures
+    .map(
+      (
+        item: {
+          title?: string | null;
+          meta?: string | null;
+          href?: string | null;
+          images?: Array<{ asset?: { _ref?: string } | null; alt?: string | null }> | null;
+        },
+        itemIndex: number,
+      ) => {
+        const title = item?.title?.trim() || "";
+        const meta = item?.meta?.trim() || "";
+        const href = item?.href?.trim() || "/";
+        const images = (item?.images || [])
+          .slice(0, 5)
+          .map((image, imageIndex) => {
+            const imageUrl = image ? urlForImage(image)?.width(2200).url() : null;
+            if (!imageUrl) return null;
+            const alt =
+              (image &&
+                "alt" in image &&
+                typeof image.alt === "string" &&
+                image.alt.trim()) ||
+              "";
+            return {
+              key: `custom-${itemIndex}-${imageIndex}-${imageUrl}`,
+              url: imageUrl,
+              blur: blurDataUrlForImage(image),
+              alt,
+            };
+          })
+          .filter(Boolean) as HomeFeatureSlide["images"];
+        if (!title && !meta && images.length === 0) return null;
+        return {
+          key: `custom-${itemIndex}`,
+          title,
+          meta,
+          href,
+          images,
+        };
+      },
+    )
+    .filter(Boolean) as HomeFeatureSlide[];
+  const sourceSlides: HomeFeatureSlide[] = featuredItems
     .map((item, itemIndex) => {
       const selected = item;
 
@@ -49,7 +96,7 @@ export default async function HomePage() {
         (selected?.homepageFeatureImages?.length
           ? selected.homepageFeatureImages
           : selected?.gallery || []
-        ).slice(0, 3);
+        ).slice(0, 5);
 
       const images = slideImagesRaw
         .map((image, imageIndex) => {
@@ -81,6 +128,7 @@ export default async function HomePage() {
       };
     })
     .filter(Boolean) as HomeFeatureSlide[];
+  const slides = customSlides.length ? customSlides : sourceSlides;
 
   if (!slides.length) {
     const fallbackImages = [settings?.heroImageLeft, settings?.heroImageRight]

@@ -24,6 +24,8 @@ const baseSlots = [
   { top: 20, left: 2, width: 20, ratio: "3 / 4" },
   { top: 8, left: 68, width: 16, ratio: "3 / 4" },
   { top: 45, left: 76, width: 24, ratio: "4 / 3" },
+  { top: 52, left: 8, width: 18, ratio: "4 / 5" },
+  { top: 14, left: 42, width: 15, ratio: "3 / 4" },
 ];
 
 function wrapIndex(index: number, total: number): number {

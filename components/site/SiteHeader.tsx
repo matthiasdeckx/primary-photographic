@@ -186,7 +186,7 @@ export function SiteHeader({
         </Link>
         <div className="pointer-events-auto flex shrink-0 gap-4 text-[length:var(--text-small)] font-medium uppercase leading-[1.2em]">
           <a
-            className="text-[var(--color-ink)] hover:opacity-80"
+            className="text-[var(--color-ink)] hover:opacity-60"
             href={send}
             {...(sendIsExternal ? { target: "_blank", rel: "noreferrer" } : {})}
           >
