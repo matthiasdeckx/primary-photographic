@@ -67,7 +67,7 @@ p[class*="text-[length:var(--text-small)]"] {
 
 /* Primary menu panel: fade siblings when one link is hovered or focus-visible */
 [data-site-menu-nav] > li {
-  transition: opacity 0.25s ease;
+  transition: opacity 0.12s linear;
 }
 
 @media (prefers-reduced-motion: reduce) {
