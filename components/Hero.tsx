@@ -16,7 +16,7 @@ export function Hero({ site }: { site: SiteSettings }) {
           src={url}
           alt={alt}
           fill
-          className="object-cover"
+          className="load-in-image object-cover"
           sizes="100vw"
           placeholder={blur ? "blur" : "empty"}
           blurDataURL={blur}

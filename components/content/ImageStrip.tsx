@@ -179,7 +179,7 @@ export function ImageStrip({
                 onLoad={() =>
                   setLoadedKeys((prev) => ({ ...prev, [usableImages[0].key]: true }))
                 }
-                className={`${frameHeightClass} block w-auto max-w-full object-contain transition-opacity duration-300 ${
+                className={`load-in-image ${frameHeightClass} block w-auto max-w-full object-contain transition-opacity duration-300 ${
                   loadedKeys[usableImages[0].key] ? "opacity-100" : "opacity-0"
                 }`}
                 style={
@@ -221,7 +221,7 @@ export function ImageStrip({
                     onLoad={() =>
                       setLoadedKeys((prev) => ({ ...prev, [img.key]: true }))
                     }
-                    className={`${frameHeightClass} block w-auto max-w-none object-contain transition-opacity duration-300 ${
+                    className={`load-in-image ${frameHeightClass} block w-auto max-w-none object-contain transition-opacity duration-300 ${
                       loadedKeys[img.key] ? "opacity-100" : "opacity-0"
                     }`}
                     style={
@@ -281,7 +281,7 @@ export function ImageStrip({
                   alt={usableImages[lightboxIndex].alt}
                   fill
                   sizes="100vw"
-                  className="object-contain"
+                  className="load-in-image object-contain"
                   placeholder={usableImages[lightboxIndex].blurUrl ? "blur" : "empty"}
                   blurDataURL={usableImages[lightboxIndex].blurUrl}
                 />
@@ -314,7 +314,7 @@ export function ImageStrip({
                     alt={img.alt}
                     fill
                     sizes="56px"
-                    className="object-cover"
+                    className="load-in-image object-cover"
                     placeholder={img.blurUrl ? "blur" : "empty"}
                     blurDataURL={img.blurUrl}
                   />

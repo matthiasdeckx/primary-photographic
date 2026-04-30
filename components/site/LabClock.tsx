@@ -27,10 +27,12 @@ export function LabClock({ schedule }: Props) {
   const tz = now ? formatNyTimeZoneAbbrev(now) : "ET";
 
   return (
-    <p className="text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
+    <p className="flex w-full items-baseline text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)] lg:block">
       <span className="tabular-nums">{time}</span>{" "}
       <span>{tz}</span>
-      <span className="ml-4">{open ? "OPEN NOW" : "CLOSED"}</span>
+      <span className="ml-auto text-right lg:ml-4 lg:text-left">
+        {open ? "OPEN NOW" : "CLOSED"}
+      </span>
     </p>
   );
 }

@@ -98,6 +98,7 @@ export function HomeFeatureSlides({ slides }: { slides: HomeFeatureSlide[] }) {
   return (
     <section
       aria-label="Homepage feature slides"
+      data-home-sequence
       className="relative min-h-[72vh]"
       onWheel={(event) => {
         if (total < 2) return;
@@ -113,7 +114,7 @@ export function HomeFeatureSlides({ slides }: { slides: HomeFeatureSlide[] }) {
         setActiveIndex((index) => wrapIndex(index + direction, total));
       }}
     >
-      <div className="pointer-events-none fixed inset-0 z-10 flex items-center justify-center">
+      <div className="home-intro-logo pointer-events-none fixed inset-0 z-10 flex items-center justify-center">
         <div style={{ width: "min(calc(100vw - 2rem), 34rem)" }}>
           <SiteLogo className="w-full" />
         </div>
@@ -130,14 +131,14 @@ export function HomeFeatureSlides({ slides }: { slides: HomeFeatureSlide[] }) {
             {slide.images.map((image) => (
               <div
                 key={image.key}
-                className="absolute overflow-hidden bg-neutral-100"
+                className="home-intro-image absolute overflow-hidden bg-neutral-100"
                 style={image.style}
               >
                 <Image
                   src={image.url}
                   alt={image.alt}
                   fill
-                  className="object-cover"
+                  className="load-in-image object-cover"
                   sizes="(max-width: 1024px) 40vw, 22vw"
                   placeholder={image.blur ? "blur" : "empty"}
                   blurDataURL={image.blur}

@@ -109,7 +109,7 @@ export function SiteFooter({
   return (
     <footer
       ref={footerRef}
-      className="relative z-40 lg:fixed lg:inset-x-0 lg:bottom-0"
+      className="home-intro-ui relative z-40 lg:fixed lg:inset-x-0 lg:bottom-0"
       data-site-footer
     >
       <div
@@ -207,7 +207,7 @@ export function SiteFooter({
 
         <div className="mx-auto w-full max-w-site pb-4 text-justify">
             {footerBody?.length ? (
-              <div className="mx-auto max-w-3xl text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-muted)] [&_a]:!text-[var(--color-ink)] [&_li]:!text-[var(--color-muted)] [&_p]:!text-[var(--color-muted)] [&_strong]:!text-[var(--color-ink)]">
+              <div className="mx-auto max-w-3xl text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-muted)] [&_a]:!text-[var(--color-ink)] [&_a]:no-underline [&_li]:!text-[var(--color-muted)] [&_p]:!text-[var(--color-muted)] [&_strong]:!text-[var(--color-ink)]">
                 <PortableBody
                   compact
                   value={footerBody}
@@ -216,7 +216,7 @@ export function SiteFooter({
               </div>
             ) : (
               <p className="mx-auto max-w-3xl text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-muted)]">
-                <Link href="/" className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-2 hover:opacity-60">
+                <Link href="/" className="font-medium text-[var(--color-ink)] no-underline hover:opacity-60">
                   {name}
                 </Link>{" "}
                 is a high-end
@@ -248,7 +248,7 @@ export function SiteFooter({
                     {" "}
                     Contact us at{" "}
                     <a
-                      className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-2"
+                      className="font-medium text-[var(--color-ink)] no-underline"
                       href={`mailto:${email}`}
                     >
                       {email}
@@ -260,7 +260,7 @@ export function SiteFooter({
                     {" "}
                     or{" "}
                     <a
-                      className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-2"
+                      className="font-medium text-[var(--color-ink)] no-underline"
                       href={`tel:${phone.replace(/\s+/g, "")}`}
                     >
                       {phone}

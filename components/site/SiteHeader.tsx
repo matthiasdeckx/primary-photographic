@@ -164,7 +164,7 @@ export function SiteHeader({
   }, [isHome, utilityPrimary, utilityHref]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 w-full">
+    <header className="home-intro-ui fixed inset-x-0 top-0 z-50 w-full">
       {/* Does not reserve layout height — menu sits high; utility links stay tappable in the corners. */}
       <div
         className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex items-start justify-between px-4"
