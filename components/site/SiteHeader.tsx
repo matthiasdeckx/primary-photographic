@@ -167,7 +167,7 @@ export function SiteHeader({
     <header className="home-intro-ui fixed inset-x-0 top-0 z-50 w-full select-none">
       {/* Does not reserve layout height — menu sits high; utility links stay tappable in the corners. */}
       <div
-        className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex items-start justify-between px-4"
+        className="pointer-events-none fixed inset-x-0 top-0 z-[60] hidden items-start justify-between px-4 lg:flex"
         style={{
           gap: "calc(1rem * var(--space-scale, 1))",
           paddingTop: "calc(1rem * var(--space-scale, 1))",
