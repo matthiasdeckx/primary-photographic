@@ -164,7 +164,7 @@ export function SiteHeader({
   }, [isHome, utilityPrimary, utilityHref]);
 
   return (
-    <header className="home-intro-ui fixed inset-x-0 top-0 z-50 w-full">
+    <header className="home-intro-ui fixed inset-x-0 top-0 z-50 w-full select-none">
       {/* Does not reserve layout height — menu sits high; utility links stay tappable in the corners. */}
       <div
         className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex items-start justify-between px-4"
@@ -231,7 +231,7 @@ export function SiteHeader({
               {menuOpen ? (
                 <div
                   id="primary-menu-panel"
-                  className="absolute inset-x-0 top-full z-10 bg-[var(--color-ink)] px-4 text-white"
+                  className="absolute inset-x-0 top-full z-10 select-none bg-[var(--color-ink)] px-4 text-white"
                   style={{
                     paddingTop: "calc(1rem * var(--space-scale, 1))",
                     paddingBottom: "calc(1rem * var(--space-scale, 1))",

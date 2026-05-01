@@ -248,7 +248,7 @@ export function ImageStrip({
 
       {lightboxIndex !== null ? (
         <div
-          className={`fixed inset-0 z-[100] bg-white/80 p-4 backdrop-blur-sm transition-opacity duration-200 ${
+          className={`fixed inset-0 z-[200] bg-white/80 p-4 backdrop-blur-sm transition-opacity duration-200 ${
             lightboxVisible ? "opacity-100" : "opacity-0"
           }`}
           role="dialog"

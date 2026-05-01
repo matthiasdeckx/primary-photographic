@@ -50,7 +50,7 @@ export default async function CommissionsPage() {
           <FullBleed>
             <ImageStrip images={featured.gallery} tall />
           </FullBleed>
-          <div className="mx-auto max-w-2xl">
+          <div className="mx-auto mt-6 max-w-2xl">
             <PortableBody value={featured.body} alignBlockHeadings="left" />
           </div>
         </section>

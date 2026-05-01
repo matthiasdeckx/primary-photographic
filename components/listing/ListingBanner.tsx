@@ -17,6 +17,8 @@ type Props = {
   titleAlign?: "left" | "center";
   /** Use muted side metadata that turns black on hover/open. */
   metaTone?: "default" | "mutedInteractive";
+  /** Stack date/title/category below xl screens. */
+  stackBelowXl?: boolean;
   bleedClassName?: string;
   className?: string;
 };
@@ -30,26 +32,39 @@ export function ListingBanner({
   overlay,
   titleAlign = "left",
   metaTone = "default",
+  stackBelowXl = false,
   bleedClassName = "",
   className = "",
 }: Props) {
-  const titleAlignClass =
-    titleAlign === "center" ? "text-center" : "text-left";
+  const titleAlignClass = stackBelowXl
+    ? titleAlign === "center"
+      ? "text-left xl:text-center"
+      : "text-left"
+    : titleAlign === "center"
+      ? "text-center"
+      : "text-left";
   const grid = end
-    ? "grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-baseline gap-x-2 sm:gap-x-3 md:grid-cols-[1fr_minmax(0,2.5fr)_1fr_auto] md:gap-x-4"
-    : "grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2 sm:gap-x-3 md:grid-cols-[1fr_minmax(0,2.5fr)_1fr] md:gap-x-4";
+    ? stackBelowXl
+      ? "grid grid-cols-1 items-baseline gap-y-0.5 xl:grid-cols-[1fr_minmax(0,2.5fr)_1fr_auto] xl:gap-x-4 xl:gap-y-0"
+      : "grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-baseline gap-x-2 sm:gap-x-3 md:grid-cols-[1fr_minmax(0,2.5fr)_1fr_auto] md:gap-x-4"
+    : stackBelowXl
+      ? "grid grid-cols-1 items-baseline gap-y-0.5 xl:grid-cols-[1fr_minmax(0,2.5fr)_1fr] xl:gap-x-4 xl:gap-y-0"
+      : "grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2 sm:gap-x-3 md:grid-cols-[1fr_minmax(0,2.5fr)_1fr] md:gap-x-4";
   const metaClass =
     metaTone === "mutedInteractive"
       ? "text-[var(--color-muted)] group-hover:text-[var(--color-ink)] group-focus-within:text-[var(--color-ink)] [details[open]_&]:text-[var(--color-ink)]"
       : "";
+  const contentWidthClass = stackBelowXl
+    ? "mx-auto w-full max-w-site xl:max-w-none"
+    : "";
 
   return (
     <FullBleed className={bleedClassName}>
       <div className="relative">
-        <div className={`${grid} ${textClass} ${className}`}>
+        <div className={`${contentWidthClass} ${grid} ${textClass} ${className}`}>
           <span className={`min-w-0 text-left tabular-nums ${metaClass}`}>{left}</span>
           <span className={`min-w-0 font-medium ${titleAlignClass}`}>{title}</span>
-          <span className={`min-w-0 text-right ${metaClass}`}>{right}</span>
+          <span className={`min-w-0 text-left xl:text-right ${metaClass}`}>{right}</span>
           {end != null ? (
             <span className="shrink-0 justify-self-end tabular-nums">{end}</span>
           ) : null}

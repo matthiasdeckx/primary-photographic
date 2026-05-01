@@ -70,11 +70,12 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
               right={item.category?.trim() || ""}
               titleAlign="center"
               metaTone="mutedInteractive"
+              stackBelowXl
               bleedClassName="py-4"
               overlay={
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute inset-y-0 inset-x-0 hidden items-center justify-between group-hover:flex group-focus-within:flex [details[open]_&]:flex"
+                  className="pointer-events-none absolute inset-y-0 inset-x-0 hidden items-center justify-between xl:group-hover:flex xl:group-focus-within:flex xl:[details[open]_&]:flex"
                 >
                   <span className="text-[length:var(--text-body)] leading-[1.2em] text-[var(--color-muted)]">
                     <span className="[details[open]_&]:hidden">+</span>
@@ -92,7 +93,7 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
             <FullBleed>
               <ImageStrip images={item.gallery} />
             </FullBleed>
-            <div className="mx-auto max-w-2xl">
+            <div className="mx-auto mt-6 max-w-2xl">
               <PortableBody value={item.body} alignBlockHeadings="left" />
             </div>
           </div>

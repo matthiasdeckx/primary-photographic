@@ -47,7 +47,7 @@ export default async function EventsPage() {
               <FullBleed>
                 <ImageStrip images={item.gallery} tall />
               </FullBleed>
-              <div className="mx-auto max-w-2xl">
+              <div className="mx-auto mt-6 max-w-2xl">
                 <PortableBody value={item.body} alignBlockHeadings="left" />
               </div>
             </div>
