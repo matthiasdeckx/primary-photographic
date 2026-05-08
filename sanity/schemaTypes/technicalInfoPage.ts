@@ -23,8 +23,8 @@ export const technicalInfoPage = defineType({
       title: "Side images",
       type: "array",
       description:
-        "Optional decorative images shown in the left/right whitespace on wide screens (1 to 5).",
-      validation: (Rule) => Rule.max(5),
+        "Optional decorative images shown in the left/right whitespace on wide screens (1 to 6).",
+      validation: (Rule) => Rule.max(6),
       of: [
         defineField({
           name: "sideImage",

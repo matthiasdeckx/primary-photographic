@@ -48,6 +48,7 @@ export function SiteFooter({
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
   const [desktopUpScrollReveal, setDesktopUpScrollReveal] = useState(false);
   const desktopRevealStartYRef = useRef<number | null>(null);
+  const nearBottomActivationYRef = useRef<number | null>(null);
 
   /* Backup — frost layer: re-enable with footerFullyInView + showFooterFrost block below.
   const [footerFullyInView, setFooterFullyInView] = useState(false);
@@ -88,11 +89,13 @@ export function SiteFooter({
     if (typeof window === "undefined") return;
     if (isHome || prefersReducedMotion) {
       setScrollNearBottom(false);
+      nearBottomActivationYRef.current = null;
       return;
     }
 
     const ENTER_PX = 72;
     const EXIT_PX = 160;
+    const EXIT_UP_SCROLL_PX = 96;
 
     const distanceFromBottom = () => {
       const root = document.documentElement;
@@ -104,15 +107,26 @@ export function SiteFooter({
 
     const apply = (fromLayoutOnly: boolean) => {
       const gap = distanceFromBottom();
+      const y = window.scrollY;
 
       setScrollNearBottom((prev) => {
         if (fromLayoutOnly && prev) {
           return true;
         }
         if (prev) {
-          return gap > EXIT_PX ? false : true;
+          const anchorY = nearBottomActivationYRef.current ?? y;
+          const scrolledUpEnough = anchorY - y >= EXIT_UP_SCROLL_PX;
+          if (gap > EXIT_PX && scrolledUpEnough) {
+            nearBottomActivationYRef.current = null;
+            return false;
+          }
+          return true;
         }
-        return gap <= ENTER_PX;
+        if (gap <= ENTER_PX) {
+          nearBottomActivationYRef.current = y;
+          return true;
+        }
+        return false;
       });
     };
 
@@ -125,13 +139,12 @@ export function SiteFooter({
     window.addEventListener("resize", onLayout);
     const vv = window.visualViewport;
     vv?.addEventListener("resize", onLayout);
-    vv?.addEventListener("scroll", onScroll);
 
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onLayout);
       vv?.removeEventListener("resize", onLayout);
-      vv?.removeEventListener("scroll", onScroll);
+      nearBottomActivationYRef.current = null;
     };
   }, [isHome, pathname, prefersReducedMotion]);
 

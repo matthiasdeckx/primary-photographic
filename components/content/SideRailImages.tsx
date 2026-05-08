@@ -12,10 +12,11 @@ type SideRailImage = {
 
 const placements = [
   { side: "left", progress: 0.06, scale: 1, speed: 0.82 },
-  { side: "right", progress: 0.16, scale: 0.9, speed: 0.86 },
-  { side: "left", progress: 0.46, scale: 1, speed: 0.84 },
-  { side: "right", progress: 0.68, scale: 0.85, speed: 0.88 },
-  { side: "left", progress: 0.9, scale: 0.95, speed: 0.85 },
+  { side: "right", progress: 0.18, scale: 0.88, speed: 0.86 },
+  { side: "left", progress: 0.34, scale: 0.95, speed: 0.84 },
+  { side: "right", progress: 0.52, scale: 0.82, speed: 0.88 },
+  { side: "left", progress: 0.72, scale: 0.92, speed: 0.85 },
+  { side: "right", progress: 0.9, scale: 0.86, speed: 0.87 },
 ] as const;
 
 export function SideRailImages({
@@ -31,7 +32,7 @@ export function SideRailImages({
   const [loadedKeys, setLoadedKeys] = useState<Record<string, boolean>>({});
   const [docHeight, setDocHeight] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
-  const usable = (images ?? []).slice(0, 5);
+  const usable = (images ?? []).slice(0, 6);
   if (!usable.length) return null;
 
   useEffect(() => {
