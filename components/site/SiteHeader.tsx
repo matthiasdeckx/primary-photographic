@@ -72,9 +72,8 @@ export function SiteHeader({
   const [barHovered, setBarHovered] = useState(false);
   /** Center logo after 0.5s hover on menu chrome (non-home); cleared when pointer leaves or menu closes. */
   const [hoverLogoVisible, setHoverLogoVisible] = useState(false);
-  const hoverLogoTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(
-    null,
-  );
+  /** Browser timers use numeric IDs (compatible with `clearTimeout` in DOM typings). */
+  const hoverLogoTimerRef = useRef<number | null>(null);
 
   const clearHoverLogoTimer = () => {
     if (hoverLogoTimerRef.current != null) {
