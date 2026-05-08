@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { blurDataUrlForImage, urlForImage } from "@/sanity/lib/image";
 
@@ -15,9 +16,11 @@ type GalleryImage = {
 export function ImageStrip({
   images,
   tall = false,
+  title,
 }: {
   images: GalleryImage[] | null | undefined;
   tall?: boolean;
+  title?: string | null;
 }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [lightboxVisible, setLightboxVisible] = useState(false);
@@ -26,6 +29,7 @@ export function ImageStrip({
   const [isParentOpen, setIsParentOpen] = useState(true);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<number | null>(null);
+  const lightboxDragStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const usableImages = useMemo(
     () =>
@@ -51,6 +55,7 @@ export function ImageStrip({
   const isSingleImage = usableImages.length === 1;
 
   const frameHeightClass = tall ? "h-[400px]" : "h-[400px]";
+  const uiInset = "calc(1rem * var(--space-scale, 1))";
 
   const openLightbox = (index: number) => {
     if (closeTimeoutRef.current) {
@@ -68,6 +73,18 @@ export function ImageStrip({
       setLightboxIndex(null);
       closeTimeoutRef.current = null;
     }, 180);
+  };
+
+  const goToNext = () => {
+    setLightboxIndex((current) =>
+      current === null ? current : (current + 1) % usableImages.length,
+    );
+  };
+
+  const goToPrevious = () => {
+    setLightboxIndex((current) =>
+      current === null ? current : (current - 1 + usableImages.length) % usableImages.length,
+    );
   };
 
   useEffect(() => {
@@ -140,20 +157,27 @@ export function ImageStrip({
       if (e.key === "Escape") {
         closeLightbox();
       } else if (e.key === "ArrowRight") {
-        setLightboxIndex((current) =>
-          current === null ? current : (current + 1) % usableImages.length,
-        );
+        goToNext();
       } else if (e.key === "ArrowLeft") {
-        setLightboxIndex((current) =>
-          current === null
-            ? current
-            : (current - 1 + usableImages.length) % usableImages.length,
-        );
+        goToPrevious();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [lightboxIndex, usableImages.length]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (lightboxIndex === null) return;
+
+    const { body } = document;
+    const previousOverflow = body.style.overflow;
+    body.style.overflow = "hidden";
+
+    return () => {
+      body.style.overflow = previousOverflow;
+    };
+  }, [lightboxIndex]);
 
   useEffect(() => {
     return () => {
@@ -246,84 +270,124 @@ export function ImageStrip({
         </div>
       )}
 
-      {lightboxIndex !== null ? (
-        <div
-          className={`fixed inset-0 z-[200] bg-white/80 p-4 backdrop-blur-sm transition-opacity duration-200 ${
-            lightboxVisible ? "opacity-100" : "opacity-0"
-          }`}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Image lightbox"
-          onClick={closeLightbox}
-        >
-          <div
-            className={`mx-auto flex h-full w-full max-w-6xl flex-col transition-all duration-200 ${
-              lightboxVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
-            }`}
-          >
-            <div className="flex justify-end pb-3">
-              <button
-                type="button"
-                onClick={closeLightbox}
-                className="text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
-                aria-label="Close lightbox"
+      {lightboxIndex !== null && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className={`fixed inset-0 z-[9999] bg-white transition-opacity duration-200 ${
+                lightboxVisible ? "opacity-100" : "opacity-0"
+              }`}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Image lightbox"
+              onClick={closeLightbox}
+            >
+              <div
+                className={`relative h-full w-full transition-all duration-200 ${
+                  lightboxVisible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
+                }`}
+                onClick={(e) => e.stopPropagation()}
               >
-                Close
-              </button>
-            </div>
-            <div
-              className="flex flex-1 items-center justify-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative h-full min-h-[50vh] w-full">
-                <Image
-                  src={usableImages[lightboxIndex].lightboxUrl}
-                  alt={usableImages[lightboxIndex].alt}
-                  fill
-                  sizes="100vw"
-                  className="load-in-image object-contain"
-                  placeholder={usableImages[lightboxIndex].blurUrl ? "blur" : "empty"}
-                  blurDataURL={usableImages[lightboxIndex].blurUrl}
-                />
-              </div>
-            </div>
-            <div
-              className="mt-3 min-h-[1.2em] text-center text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {usableImages[lightboxIndex].caption || ""}
-            </div>
-            <div
-              className="mt-3 flex flex-wrap justify-center gap-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {usableImages.map((img, i) => (
+                {title?.trim() ? (
+                  <p
+                    className="pointer-events-none absolute left-0 z-20 max-w-[70vw] truncate px-4 text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
+                    style={{
+                      top: `calc(${uiInset} + env(safe-area-inset-top, 0px))`,
+                    }}
+                  >
+                    {title}
+                  </p>
+                ) : null}
                 <button
-                  key={`thumb-${img.key}`}
                   type="button"
-                  className={`relative h-14 w-14 overflow-hidden border ${
-                    i === lightboxIndex
-                      ? "border-[var(--color-ink)]"
-                      : "border-[var(--color-ink)]/30"
-                  }`}
-                  onClick={() => setLightboxIndex(i)}
-                  aria-label={`Go to image ${i + 1}`}
+                  onClick={closeLightbox}
+                  className="absolute right-0 z-20 px-4 text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
+                  style={{
+                    top: `calc(${uiInset} + env(safe-area-inset-top, 0px))`,
+                  }}
+                  aria-label="Close lightbox"
                 >
-                  <Image
-                    src={img.lightboxUrl}
-                    alt={img.alt}
-                    fill
-                    sizes="56px"
-                    className="load-in-image object-cover"
-                    placeholder={img.blurUrl ? "blur" : "empty"}
-                    blurDataURL={img.blurUrl}
-                  />
+                  Close
                 </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
+
+                <div
+                  className="relative flex h-full select-none items-center justify-center"
+                  style={{
+                    paddingLeft: `calc(${uiInset} * 3.5)`,
+                    paddingRight: `calc(${uiInset} * 3.5)`,
+                    paddingTop: `calc(${uiInset} * 3)`,
+                    paddingBottom: `calc(${uiInset} * 3)`,
+                    touchAction: "pan-y",
+                  }}
+                  onPointerDown={(e) => {
+                    lightboxDragStartRef.current = { x: e.clientX, y: e.clientY };
+                  }}
+                  onPointerUp={(e) => {
+                    const start = lightboxDragStartRef.current;
+                    lightboxDragStartRef.current = null;
+                    if (!start) return;
+                    const dx = e.clientX - start.x;
+                    const dy = e.clientY - start.y;
+                    if (Math.abs(dx) < 48 || Math.abs(dx) <= Math.abs(dy)) return;
+                    if (dx < 0) goToNext();
+                    else goToPrevious();
+                  }}
+                  onPointerCancel={() => {
+                    lightboxDragStartRef.current = null;
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={goToPrevious}
+                    className="absolute left-0 top-1/2 z-20 -translate-y-1/2 px-4 py-1 text-[length:var(--text-body)] leading-none text-[var(--color-ink)]"
+                    aria-label="Previous image"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goToNext}
+                    className="absolute right-0 top-1/2 z-20 -translate-y-1/2 px-4 py-1 text-[length:var(--text-body)] leading-none text-[var(--color-ink)]"
+                    aria-label="Next image"
+                  >
+                    ›
+                  </button>
+
+                  <div className="relative h-full min-h-[50vh] w-full">
+                    <Image
+                      src={usableImages[lightboxIndex].lightboxUrl}
+                      alt={usableImages[lightboxIndex].alt}
+                      fill
+                      sizes="100vw"
+                      className="load-in-image object-contain"
+                      placeholder={usableImages[lightboxIndex].blurUrl ? "blur" : "empty"}
+                      blurDataURL={usableImages[lightboxIndex].blurUrl}
+                    />
+                  </div>
+
+                </div>
+                {usableImages[lightboxIndex].caption ? (
+                  <div
+                    className="pointer-events-none absolute left-1/2 z-20 min-h-[1.2em] -translate-x-1/2 px-4 text-center text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
+                    style={{
+                      bottom: `calc(${uiInset} + env(safe-area-inset-bottom, 0px))`,
+                    }}
+                  >
+                    {usableImages[lightboxIndex].caption}
+                  </div>
+                ) : null}
+                <div
+                  className="pointer-events-none absolute right-0 z-20 px-4 text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
+                  style={{
+                    bottom: `calc(${uiInset} + env(safe-area-inset-bottom, 0px))`,
+                  }}
+                >
+                  {lightboxIndex + 1} / {usableImages.length}
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

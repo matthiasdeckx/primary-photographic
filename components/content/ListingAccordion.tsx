@@ -91,7 +91,7 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
           </summary>
           <div className="pb-8 pt-0">
             <FullBleed>
-              <ImageStrip images={item.gallery} />
+              <ImageStrip images={item.gallery} title={item.title} />
             </FullBleed>
             <div className="mx-auto mt-6 max-w-2xl">
               <PortableBody value={item.body} alignBlockHeadings="left" />
