@@ -177,11 +177,24 @@ p[class*="text-[length:var(--text-small)]"] {
   transition: opacity 0.12s linear;
 }
 
+/* Menu hover / open centered logo — slower than route flashes so the fade reads; curve matches load-in images */
+.menu-center-logo {
+  opacity: 0;
+  animation: menu-center-logo-fade-in 800ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes menu-center-logo-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .load-in-image,
   .home-intro-image,
   .home-intro-logo,
   .home-intro-ui,
+  .menu-center-logo,
   .page-transition-content {
     opacity: 1 !important;
     transform: none !important;
@@ -230,4 +243,15 @@ html.home-no-scroll,
 html.home-no-scroll body {
   height: 100%;
   overflow: hidden;
+}
+
+/* Homepage locks the viewport; keep footer fixed at all breakpoints so it stays fully visible (tablet was clipping relative footer). */
+html.home-no-scroll [data-site-footer] {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+}
+
+html.home-no-scroll [data-page-shell-main] {
+  padding-bottom: calc(var(--site-footer-height, 260px) + 1rem);
 }

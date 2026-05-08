@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SiteLogo } from "@/components/site/SiteLogo";
+import { SiteLogoFrame } from "@/components/site/SiteLogoFrame";
 
 type SlideImage = {
   key: string;
@@ -114,10 +115,10 @@ export function HomeFeatureSlides({ slides }: { slides: HomeFeatureSlide[] }) {
         setActiveIndex((index) => wrapIndex(index + direction, total));
       }}
     >
-      <div className="home-intro-logo pointer-events-none fixed inset-0 z-10 flex select-none items-center justify-center">
-        <div style={{ width: "min(calc(100vw - 2rem), 34rem)" }}>
+      <div className="home-intro-logo pointer-events-none fixed left-0 top-0 z-10 flex h-dvh w-full select-none items-center justify-center pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+        <SiteLogoFrame>
           <SiteLogo className="w-full" />
-        </div>
+        </SiteLogoFrame>
       </div>
 
       <div className="relative z-0 h-[72vh]">

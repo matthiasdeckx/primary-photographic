@@ -1,7 +1,7 @@
 import type { PortableTextBlock } from "@portabletext/types";
 import type { ReactNode } from "react";
 
-import { PageContentTransition } from "@/components/site/PageContentTransition";
+import { PageShellMain } from "@/components/site/PageShellMain";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import type { LabClockSchedule } from "@/lib/labHours";
@@ -55,17 +55,7 @@ export function PageShell({
         homeUtilityPrimary={homeUtilityPrimary}
         homeUtilitySecondary={homeUtilitySecondary}
       />
-      <div
-        className="w-full flex-1 px-4 pb-[calc(1.5rem*var(--space-scale,1))] lg:pb-[calc(var(--site-footer-height,260px)+1rem)]"
-        style={{
-          paddingTop:
-            "calc(var(--site-header-height, 280px) + (2.5rem * var(--space-scale, 1)))",
-        }}
-      >
-        <div className="mx-auto w-full max-w-site flex-1">
-          <PageContentTransition>{children}</PageContentTransition>
-        </div>
-      </div>
+      <PageShellMain>{children}</PageShellMain>
       <SiteFooter
         siteTitle={siteTitle}
         footerBody={footerBody}

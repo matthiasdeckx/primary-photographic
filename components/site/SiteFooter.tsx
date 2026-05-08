@@ -2,6 +2,7 @@
 
 import type { PortableTextBlock } from "@portabletext/types";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { PortableBody } from "@/components/content/PortableBody";
@@ -31,6 +32,8 @@ export function SiteFooter({
   hours,
   labClockSchedule,
 }: Props) {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
   const name = (siteTitle?.trim() || "PRIMARY PHOTOGRAPHIC").toUpperCase();
   const footerRef = useRef<HTMLElement>(null);
   const newsletterInputRef = useRef<HTMLInputElement>(null);
@@ -39,6 +42,136 @@ export function SiteFooter({
     "idle" | "submitting" | "success" | "error"
   >("idle");
   const [newsletterMessage, setNewsletterMessage] = useState("");
+  const [menuOpenSync, setMenuOpenSync] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [scrollNearBottom, setScrollNearBottom] = useState(false);
+
+  /* Backup — frost layer: re-enable with footerFullyInView + showFooterFrost block below.
+  const [footerFullyInView, setFooterFullyInView] = useState(false);
+  */
+
+  useEffect(() => {
+    const onMenuChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ open?: boolean }>).detail;
+      setMenuOpenSync(Boolean(detail?.open));
+    };
+    window.addEventListener("site-menu-open-change", onMenuChange);
+    return () => window.removeEventListener("site-menu-open-change", onMenuChange);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setPrefersReducedMotion(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  /**
+   * Near-bottom for non-home: drives footer intro + mobile expanded chrome.
+   * Uses hysteresis + ignoring layout-only updates while latched to avoid oscillation when
+   * the fixed footer expands/collapses and changes document scrollHeight (ResizeObserver was
+   * firing that loop on mobile).
+   */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (isHome || prefersReducedMotion) {
+      setScrollNearBottom(false);
+      return;
+    }
+
+    const ENTER_PX = 72;
+    const EXIT_PX = 160;
+
+    const distanceFromBottom = () => {
+      const root = document.documentElement;
+      const vv = window.visualViewport;
+      const viewH = vv?.height ?? window.innerHeight;
+      const scrollBottom = window.scrollY + viewH;
+      return root.scrollHeight - scrollBottom;
+    };
+
+    const apply = (fromLayoutOnly: boolean) => {
+      const gap = distanceFromBottom();
+
+      setScrollNearBottom((prev) => {
+        if (fromLayoutOnly && prev) {
+          return true;
+        }
+        if (prev) {
+          return gap > EXIT_PX ? false : true;
+        }
+        return gap <= ENTER_PX;
+      });
+    };
+
+    const onScroll = () => apply(false);
+    const onLayout = () => apply(true);
+
+    apply(false);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onLayout);
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", onLayout);
+    vv?.addEventListener("scroll", onScroll);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onLayout);
+      vv?.removeEventListener("resize", onLayout);
+      vv?.removeEventListener("scroll", onScroll);
+    };
+  }, [isHome, pathname, prefersReducedMotion]);
+
+  /* Backup — frost: tracks when footer is fully in viewport (used for frosted backdrop).
+  useEffect(() => {
+    const el = footerRef.current;
+    if (!el || typeof window === "undefined") return;
+
+    const tolerance = 2;
+
+    const update = () => {
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      setFooterFullyInView(
+        r.height > 0 &&
+          r.top >= -tolerance &&
+          r.bottom <= vh + tolerance,
+      );
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      ro.disconnect();
+    };
+  }, [pathname]);
+  */
+
+  const showFooterBodyParagraph =
+    isHome ||
+    prefersReducedMotion ||
+    menuOpenSync ||
+    scrollNearBottom;
+
+  /** Below lg: show only the address strip until menu opens or near bottom (plus home / reduced-motion). */
+  const showMobileFooterExpanded =
+    menuOpenSync ||
+    scrollNearBottom ||
+    isHome ||
+    prefersReducedMotion;
+
+  /* Backup — frost visibility gate:
+  const showFooterFrost = footerFullyInView && showFooterBodyParagraph;
+  */
 
   useLayoutEffect(() => {
     const el = footerRef.current;
@@ -106,12 +239,31 @@ export function SiteFooter({
     }
   };
 
+  /* Backup — top fade mask for frosted footer layer (pair with showFooterFrost JSX below).
+  const footerFrostMask =
+    "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.25) 4%, black 10%)";
+  */
+
   return (
     <footer
       ref={footerRef}
-      className="home-intro-ui relative z-40 lg:fixed lg:inset-x-0 lg:bottom-0"
+      className="home-intro-ui fixed inset-x-0 bottom-0 z-40 w-full overflow-hidden"
       data-site-footer
     >
+      {/* Backup — frosted footer backdrop (bg-white/90 + backdrop-blur). Restore with
+          footerFullyInView state, useEffect, showFooterFrost, footerFrostMask above.
+      {showFooterFrost ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 bg-white/90 backdrop-blur-[8px]"
+          style={{
+            maskImage: footerFrostMask,
+            WebkitMaskImage: footerFrostMask,
+          }}
+        />
+      ) : null}
+      */}
+      <div className="relative z-10">
       <div
         className="relative w-full px-4 lg:pt-10"
         style={{
@@ -120,14 +272,18 @@ export function SiteFooter({
         }}
       >
         <div className="mx-auto w-full max-w-site lg:max-w-none">
-          <div className="mx-auto w-full max-w-3xl lg:max-w-none">
+          <div
+            className={`mx-auto w-full max-w-3xl lg:max-w-none ${
+              showMobileFooterExpanded ? "" : "max-lg:hidden"
+            }`}
+          >
             <div
               className="pointer-events-none mb-4 grid w-full grid-cols-1 items-end gap-y-2 lg:absolute lg:inset-x-0 lg:bottom-4 lg:mb-0 lg:grid-cols-[1fr_auto] lg:gap-y-0 lg:px-4"
               style={{
                 gap: "calc(1rem * var(--space-scale, 1))",
               }}
             >
-              <div className="pointer-events-auto w-full justify-self-start">
+              <div className="pointer-events-auto hidden w-full justify-self-start lg:block">
                 <LabClock schedule={labClockSchedule} />
               </div>
               <div className="pointer-events-auto w-full justify-self-end text-[length:var(--text-small)] uppercase leading-[1.2em] text-left lg:w-auto lg:text-right">
@@ -205,7 +361,15 @@ export function SiteFooter({
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-site pb-4 text-justify">
+        <div
+          data-footer-body-region
+          aria-hidden={!showFooterBodyParagraph}
+          className={`mx-auto w-full max-w-site pb-4 text-justify transition-opacity duration-200 ease-out motion-reduce:transition-none ${
+            showFooterBodyParagraph
+              ? "opacity-100"
+              : "pointer-events-none opacity-0"
+          } ${showMobileFooterExpanded ? "" : "max-lg:hidden"}`}
+        >
             {footerBody?.length ? (
               <div className="mx-auto max-w-3xl text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-muted)] [&_a]:!text-[var(--color-ink)] [&_a]:no-underline [&_li]:!text-[var(--color-muted)] [&_p]:!text-[var(--color-muted)] [&_strong]:!text-[var(--color-ink)]">
                 <PortableBody
@@ -287,6 +451,7 @@ export function SiteFooter({
             </div>
           </div>
         )}
+      </div>
       </div>
     </footer>
   );

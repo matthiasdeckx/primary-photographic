@@ -11,6 +11,8 @@ import {
 } from "react";
 
 import { barLabelForPath } from "@/components/site/pathBarLabel";
+import { SiteLogo } from "@/components/site/SiteLogo";
+import { SiteLogoFrame } from "@/components/site/SiteLogoFrame";
 import { DEFAULT_MENU_ITEMS } from "@/lib/menuDefaults";
 import type {
   NavigationPayload,
@@ -68,6 +70,18 @@ export function SiteHeader({
   const isHome = pathname === "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const [barHovered, setBarHovered] = useState(false);
+  /** Center logo after 0.5s hover on menu chrome (non-home); cleared when pointer leaves or menu closes. */
+  const [hoverLogoVisible, setHoverLogoVisible] = useState(false);
+  const hoverLogoTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(
+    null,
+  );
+
+  const clearHoverLogoTimer = () => {
+    if (hoverLogoTimerRef.current != null) {
+      window.clearTimeout(hoverLogoTimerRef.current);
+      hoverLogoTimerRef.current = null;
+    }
+  };
 
   const menuItems = useMemo(
     () => resolveMenuItems(navigation ?? null),
@@ -81,7 +95,22 @@ export function SiteHeader({
   useLayoutEffect(() => {
     setMenuOpen(false);
     setBarHovered(false);
+    setHoverLogoVisible(false);
+    clearHoverLogoTimer();
   }, [pathname]);
+
+  useEffect(() => {
+    return () => clearHoverLogoTimer();
+  }, []);
+
+  useEffect(() => {
+    if (menuOpen) {
+      clearHoverLogoTimer();
+      return;
+    }
+    setHoverLogoVisible(false);
+    clearHoverLogoTimer();
+  }, [menuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -92,11 +121,33 @@ export function SiteHeader({
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("site-menu-open-change", { detail: { open: menuOpen } }),
+    );
+  }, [menuOpen]);
+
   const send = sendFilmPdfUrl?.trim() || sendFilmUrl?.trim() || "#";
   const sendIsExternal = /^https?:\/\//i.test(send);
   const isSendFilmLabel = (label: string) => label.trim().toLowerCase() === "send film";
 
   const closeMenu = () => setMenuOpen(false);
+
+  const handleChromePointerEnter = () => {
+    if (isHome || menuOpen) return;
+    clearHoverLogoTimer();
+    hoverLogoTimerRef.current = window.setTimeout(() => {
+      setHoverLogoVisible(true);
+      hoverLogoTimerRef.current = null;
+    }, 500);
+  };
+
+  const handleChromePointerLeave = () => {
+    clearHoverLogoTimer();
+    setHoverLogoVisible(false);
+  };
+
+  const showMenuCenterLogo = !isHome && (menuOpen || hoverLogoVisible);
 
   /** Collapsed chrome: menu bar only (clock/links are fixed separately). Menu panel is absolutely positioned under the button so it does not change this height or main content offset. */
   const chromeRef = useRef<HTMLDivElement>(null);
@@ -165,6 +216,20 @@ export function SiteHeader({
 
   return (
     <header className="home-intro-ui fixed inset-x-0 top-0 z-50 w-full select-none">
+      {showMenuCenterLogo ? (
+        <div className="menu-center-logo pointer-events-none fixed left-0 top-0 z-40 flex h-dvh w-full select-none items-center justify-center pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+          <SiteLogoFrame>
+            <Link
+              href="/"
+              onClick={closeMenu}
+              className="pointer-events-auto block w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"
+              aria-label="Primary Photographic — Home"
+            >
+              <SiteLogo className="w-full" />
+            </Link>
+          </SiteLogoFrame>
+        </div>
+      ) : null}
       {/* Does not reserve layout height — menu sits high; utility links stay tappable in the corners. */}
       <div
         className="pointer-events-none fixed inset-x-0 top-0 z-[60] hidden items-start justify-between px-4 lg:flex"
@@ -204,6 +269,8 @@ export function SiteHeader({
       <div
         ref={chromeRef}
         className={`relative z-50 flex w-full flex-col px-4 ${menuOpen ? "pb-0" : ""}`}
+        onPointerEnter={handleChromePointerEnter}
+        onPointerLeave={handleChromePointerLeave}
         style={{
           gap: "calc(0.5rem * var(--space-scale, 1))",
           paddingTop: "calc(0.5rem * var(--space-scale, 1))",
