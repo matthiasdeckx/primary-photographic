@@ -45,6 +45,9 @@ export function SiteFooter({
   const [menuOpenSync, setMenuOpenSync] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [scrollNearBottom, setScrollNearBottom] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
+  const [desktopUpScrollReveal, setDesktopUpScrollReveal] = useState(false);
+  const desktopRevealStartYRef = useRef<number | null>(null);
 
   /* Backup — frost layer: re-enable with footerFullyInView + showFooterFrost block below.
   const [footerFullyInView, setFooterFullyInView] = useState(false);
@@ -62,6 +65,14 @@ export function SiteFooter({
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const sync = () => setPrefersReducedMotion(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktopViewport(mq.matches);
     sync();
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
@@ -124,6 +135,46 @@ export function SiteFooter({
     };
   }, [isHome, pathname, prefersReducedMotion]);
 
+  /** Desktop "reverse sticky" behavior: reveal full footer while scrolling up. */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isDesktopViewport || isHome || prefersReducedMotion) {
+      setDesktopUpScrollReveal(false);
+      desktopRevealStartYRef.current = null;
+      return;
+    }
+
+    let lastY = window.scrollY;
+    const minDelta = 8;
+    const topReset = 40;
+    const hideAfterDownscrollPx = 60;
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY;
+      if (Math.abs(delta) < minDelta) return;
+
+      if (delta < 0 && y > topReset) {
+        setDesktopUpScrollReveal(true);
+        desktopRevealStartYRef.current = y;
+      } else if (delta > 0) {
+        const startY = desktopRevealStartYRef.current;
+        if (startY != null && y - startY >= hideAfterDownscrollPx) {
+          setDesktopUpScrollReveal(false);
+          desktopRevealStartYRef.current = null;
+        }
+      }
+
+      lastY = y;
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      desktopRevealStartYRef.current = null;
+    };
+  }, [isDesktopViewport, isHome, prefersReducedMotion]);
+
   /* Backup — frost: tracks when footer is fully in viewport (used for frosted backdrop).
   useEffect(() => {
     const el = footerRef.current;
@@ -160,7 +211,8 @@ export function SiteFooter({
     isHome ||
     prefersReducedMotion ||
     menuOpenSync ||
-    scrollNearBottom;
+    scrollNearBottom ||
+    desktopUpScrollReveal;
 
   /** Below lg: show only the address strip until menu opens or near bottom (plus home / reduced-motion). */
   const showMobileFooterExpanded =
@@ -168,6 +220,10 @@ export function SiteFooter({
     scrollNearBottom ||
     isHome ||
     prefersReducedMotion;
+
+  const showFooterBackground = isDesktopViewport
+    ? !isHome && (desktopUpScrollReveal || scrollNearBottom || menuOpenSync)
+    : true;
 
   /* Backup — frost visibility gate:
   const showFooterFrost = footerFullyInView && showFooterBodyParagraph;
@@ -250,6 +306,12 @@ export function SiteFooter({
       className="home-intro-ui fixed inset-x-0 bottom-0 z-40 w-full overflow-hidden"
       data-site-footer
     >
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute inset-0 z-0 bg-white transition-opacity duration-200 ease-out motion-reduce:transition-none ${
+          showFooterBackground ? "opacity-100" : "opacity-0"
+        }`}
+      />
       {/* Backup — frosted footer backdrop (bg-white/90 + backdrop-blur). Restore with
           footerFullyInView state, useEffect, showFooterFrost, footerFrostMask above.
       {showFooterFrost ? (

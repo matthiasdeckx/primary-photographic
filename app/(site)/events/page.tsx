@@ -44,7 +44,7 @@ export default async function EventsPage() {
               <EventRow item={item} />
             </summary>
             <div className="pb-8 pt-0">
-              <FullBleed>
+              <FullBleed padded={false}>
                 <ImageStrip images={item.gallery} tall title={item.title} />
               </FullBleed>
               <div className="mx-auto mt-6 max-w-2xl">

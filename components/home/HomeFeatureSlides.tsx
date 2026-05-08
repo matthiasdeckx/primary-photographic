@@ -21,13 +21,17 @@ export type HomeFeatureSlide = {
   images: SlideImage[];
 };
 
+/**
+ * Stable hero composition (desktop-first) inspired by the provided reference:
+ * - one dominant image on the left
+ * - two stacked images on the right
+ * Keep deterministic positions across slides (no random drift).
+ */
 const baseSlots = [
-  { top: 20, left: 2, width: 20, ratio: "3 / 4" },
-  { top: 8, left: 68, width: 16, ratio: "3 / 4" },
-  { top: 45, left: 76, width: 24, ratio: "4 / 3" },
-  { top: 52, left: 8, width: 18, ratio: "4 / 5" },
-  { top: 14, left: 42, width: 15, ratio: "3 / 4" },
-];
+  { top: 14, left: 1.5, width: 20.5, ratio: "4 / 5" },
+  { top: 12, right: 1.5, width: 15, ratio: "4 / 5" },
+  { bottom: "calc(var(--site-footer-height, 260px) + 44px)", right: 1.5, width: 24.5, ratio: "4 / 3" },
+] as const;
 
 function wrapIndex(index: number, total: number): number {
   if (total <= 0) return 0;
@@ -36,6 +40,8 @@ function wrapIndex(index: number, total: number): number {
 
 export function HomeFeatureSlides({ slides }: { slides: HomeFeatureSlide[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
+  const [mobileImageIndex, setMobileImageIndex] = useState(0);
   const lastWheelAt = useRef(0);
   const total = slides.length;
 
@@ -55,6 +61,29 @@ export function HomeFeatureSlides({ slides }: { slides: HomeFeatureSlide[] }) {
   }, [active]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktopViewport(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    setMobileImageIndex(0);
+  }, [activeIndex, isDesktopViewport]);
+
+  useEffect(() => {
+    if (isDesktopViewport) return;
+    if (!active?.images?.length || active.images.length < 2) return;
+
+    const id = window.setInterval(() => {
+      setMobileImageIndex((index) => wrapIndex(index + 1, active.images.length));
+    }, 2000);
+    return () => window.clearInterval(id);
+  }, [active, isDesktopViewport]);
+
+  useEffect(() => {
     if (typeof document === "undefined") return;
     const root = document.documentElement;
     root.classList.add("home-no-scroll");
@@ -65,19 +94,18 @@ export function HomeFeatureSlides({ slides }: { slides: HomeFeatureSlide[] }) {
 
   const positionedSlides = useMemo(
     () =>
-      slides.map((slide, slideIndex) => ({
+      slides.map((slide) => ({
         ...slide,
-        images: slide.images.map((image, imageIndex) => {
+        images: slide.images.slice(0, 3).map((image, imageIndex) => {
           const base = baseSlots[imageIndex % baseSlots.length];
-          const topOffset = ((slideIndex * 11 + imageIndex * 7) % 7) - 3;
-          const leftOffset = ((slideIndex * 13 + imageIndex * 5) % 7) - 3;
-          const widthOffset = ((slideIndex * 9 + imageIndex * 3) % 5) - 2;
           return {
             ...image,
             style: {
-              top: `${base.top + topOffset}%`,
-              left: `${base.left + leftOffset}%`,
-              width: `${Math.max(12, base.width + widthOffset)}vw`,
+              ...(base.top != null ? { top: `${base.top}%` } : {}),
+              ...(base.bottom != null ? { bottom: base.bottom } : {}),
+              ...(base.left != null ? { left: `${base.left}%` } : {}),
+              ...(base.right != null ? { right: `${base.right}%` } : {}),
+              width: `${base.width}vw`,
               aspectRatio: base.ratio,
             },
           };
@@ -121,33 +149,56 @@ export function HomeFeatureSlides({ slides }: { slides: HomeFeatureSlide[] }) {
         </SiteLogoFrame>
       </div>
 
-      <div className="relative z-0 h-[72vh]">
-        {positionedSlides.map((slide, slideIndex) => (
-          <div
-            key={slide.key}
-            className="absolute inset-0 transition-opacity duration-500"
-            style={{ opacity: slideIndex === activeIndex ? 1 : 0 }}
-            aria-hidden={slideIndex !== activeIndex}
-          >
-            {slide.images.map((image) => (
+      <div className="relative z-0 h-dvh">
+        {isDesktopViewport
+          ? positionedSlides.map((slide, slideIndex) => (
+              <div
+                key={slide.key}
+                className="absolute inset-0 transition-opacity duration-500"
+                style={{ opacity: slideIndex === activeIndex ? 1 : 0 }}
+                aria-hidden={slideIndex !== activeIndex}
+              >
+                {slide.images.map((image) => (
+                  <div
+                    key={image.key}
+                    className="home-intro-image absolute select-none overflow-hidden bg-neutral-100"
+                    style={image.style}
+                  >
+                    <Image
+                      src={image.url}
+                      alt={image.alt}
+                      fill
+                      className="load-in-image select-none object-cover"
+                      sizes="(max-width: 1024px) 40vw, 22vw"
+                      placeholder={image.blur ? "blur" : "empty"}
+                      blurDataURL={image.blur}
+                    />
+                  </div>
+                ))}
+              </div>
+            ))
+          : active?.images.map((image, imageIndex) => (
               <div
                 key={image.key}
-                className="home-intro-image absolute select-none overflow-hidden bg-neutral-100"
-                style={image.style}
+                className="absolute inset-0 transition-opacity duration-500"
+                style={{ opacity: imageIndex === mobileImageIndex ? 1 : 0 }}
+                aria-hidden={imageIndex !== mobileImageIndex}
               >
-                <Image
-                  src={image.url}
-                  alt={image.alt}
-                  fill
-                  className="load-in-image select-none object-cover"
-                  sizes="(max-width: 1024px) 40vw, 22vw"
-                  placeholder={image.blur ? "blur" : "empty"}
-                  blurDataURL={image.blur}
-                />
+                <div className="box-border flex h-full w-full items-center justify-center px-4">
+                  <div className="relative h-[min(62vh,640px)] w-[min(88vw,640px)] overflow-hidden">
+                    <Image
+                      src={image.url}
+                      alt={image.alt}
+                      fill
+                      className="load-in-image select-none object-contain"
+                      sizes="88vw"
+                      placeholder={image.blur ? "blur" : "empty"}
+                      blurDataURL={image.blur}
+                    />
+                  </div>
+                </div>
               </div>
             ))}
-          </div>
-        ))}
       </div>
     </section>
   );

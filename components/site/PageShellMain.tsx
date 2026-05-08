@@ -2,6 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { PageContentTransition } from "@/components/site/PageContentTransition";
 
@@ -11,7 +12,13 @@ type Props = {
 
 /** Match SiteHeader: dim page when the primary nav sheet is open (same event as SiteFooter menu sync). */
 export function PageShellMain({ children }: Props) {
-  const [menuOpenDim, setMenuOpenDim] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  /*
+   * Backup: menu-open white curtain.
+   * Disabled for now since footer carries its own white background treatment.
+   */
+  const [menuOpenCurtain, setMenuOpenCurtain] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -25,7 +32,7 @@ export function PageShellMain({ children }: Props) {
   useEffect(() => {
     const onMenuChange = (event: Event) => {
       const detail = (event as CustomEvent<{ open?: boolean }>).detail;
-      setMenuOpenDim(Boolean(detail?.open));
+      setMenuOpenCurtain(Boolean(detail?.open));
     };
     window.addEventListener("site-menu-open-change", onMenuChange);
     return () => {
@@ -35,19 +42,28 @@ export function PageShellMain({ children }: Props) {
 
   const style: CSSProperties = {
     paddingTop:
-      "calc(var(--site-header-height, 280px) + (2.5rem * var(--space-scale, 1)))",
-    opacity: menuOpenDim ? 0.14 : 1,
-    transition: prefersReducedMotion
-      ? "none"
-      : "opacity 500ms cubic-bezier(0.33, 1, 0.68, 1)",
+      isHome
+        ? "0px"
+        : "calc(var(--site-header-height, 280px) + (2.5rem * var(--space-scale, 1)))",
   };
 
   return (
     <div
       data-page-shell-main
-      className="w-full flex-1 px-4 pb-[calc(var(--site-footer-height,260px)+1rem)]"
+      className="relative w-full flex-1 px-4 pb-[calc(var(--site-footer-height,260px)+1rem)]"
       style={style}
     >
+      {/* <div
+        aria-hidden
+        className={`pointer-events-none fixed inset-0 z-[30] bg-white transition-opacity duration-500 ease-out motion-reduce:transition-none ${
+          menuOpenCurtain ? "opacity-100" : "opacity-0"
+        }`}
+        style={{
+          transition: prefersReducedMotion
+            ? "none"
+            : "opacity 500ms cubic-bezier(0.33, 1, 0.68, 1)",
+        }}
+      /> */}
       <div className="mx-auto w-full max-w-site flex-1">
         <PageContentTransition>{children}</PageContentTransition>
       </div>

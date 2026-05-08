@@ -90,7 +90,7 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
             />
           </summary>
           <div className="pb-8 pt-0">
-            <FullBleed>
+            <FullBleed padded={false}>
               <ImageStrip images={item.gallery} title={item.title} />
             </FullBleed>
             <div className="mx-auto mt-6 max-w-2xl">

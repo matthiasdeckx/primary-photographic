@@ -47,7 +47,7 @@ export default async function CommissionsPage() {
             titleAlign="center"
             bleedClassName="py-3"
           />
-          <FullBleed>
+          <FullBleed padded={false}>
             <ImageStrip images={featured.gallery} tall title={featured.title} />
           </FullBleed>
           <div className="mx-auto mt-6 max-w-2xl">

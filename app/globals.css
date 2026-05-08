@@ -253,5 +253,6 @@ html.home-no-scroll [data-site-footer] {
 }
 
 html.home-no-scroll [data-page-shell-main] {
+  padding-top: 0 !important;
   padding-bottom: calc(var(--site-footer-height, 260px) + 1rem);
 }

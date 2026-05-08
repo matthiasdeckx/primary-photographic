@@ -3,6 +3,10 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Mousewheel } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
+import "swiper/css";
 
 import { blurDataUrlForImage, urlForImage } from "@/sanity/lib/image";
 
@@ -25,11 +29,11 @@ export function ImageStrip({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [lightboxVisible, setLightboxVisible] = useState(false);
   const [loadedKeys, setLoadedKeys] = useState<Record<string, boolean>>({});
-  const [isVisible, setIsVisible] = useState(false);
-  const [isParentOpen, setIsParentOpen] = useState(true);
-  const scrollerRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<number | null>(null);
   const lightboxDragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const stripTapStartRef = useRef<{ x: number; y: number } | null>(null);
+  const stripTapMovedRef = useRef(false);
+  const stripSwiperRef = useRef<SwiperType | null>(null);
 
   const usableImages = useMemo(
     () =>
@@ -56,6 +60,31 @@ export function ImageStrip({
 
   const frameHeightClass = tall ? "h-[400px]" : "h-[400px]";
   const uiInset = "calc(1rem * var(--space-scale, 1))";
+  const TAP_DRAG_THRESHOLD_PX = 8;
+
+  const beginTapTracking = (x: number, y: number) => {
+    stripTapStartRef.current = { x, y };
+    stripTapMovedRef.current = false;
+  };
+
+  const updateTapTracking = (x: number, y: number) => {
+    const start = stripTapStartRef.current;
+    if (!start || stripTapMovedRef.current) return;
+    if (Math.abs(x - start.x) > TAP_DRAG_THRESHOLD_PX || Math.abs(y - start.y) > TAP_DRAG_THRESHOLD_PX) {
+      stripTapMovedRef.current = true;
+    }
+  };
+
+  const cancelTapTracking = () => {
+    stripTapStartRef.current = null;
+    stripTapMovedRef.current = false;
+  };
+
+  const shouldBlockTapOpen = () => {
+    const moved = stripTapMovedRef.current;
+    cancelTapTracking();
+    return moved;
+  };
 
   const openLightbox = (index: number) => {
     if (closeTimeoutRef.current) {
@@ -86,70 +115,6 @@ export function ImageStrip({
       current === null ? current : (current - 1 + usableImages.length) % usableImages.length,
     );
   };
-
-  useEffect(() => {
-    const node = scrollerRef.current;
-    if (!node) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        setIsVisible(Boolean(entry?.isIntersecting));
-      },
-      { threshold: 0.2 },
-    );
-    io.observe(node);
-    return () => io.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const node = scrollerRef.current;
-    if (!node) return;
-    const details = node.closest("details");
-    if (!details) {
-      setIsParentOpen(true);
-      return;
-    }
-    const sync = () => setIsParentOpen(details.hasAttribute("open"));
-    sync();
-    const mo = new MutationObserver(sync);
-    mo.observe(details, { attributes: true, attributeFilter: ["open"] });
-    return () => mo.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const node = scrollerRef.current;
-    if (!node) return;
-    if (!isVisible || !isParentOpen || lightboxIndex !== null) return;
-    if (node.scrollWidth <= node.clientWidth) return;
-
-    let rafId = 0;
-    let lastTs = 0;
-    let direction = 1;
-    const speedPxPerSecond = 18;
-
-    const tick = (ts: number) => {
-      if (!lastTs) lastTs = ts;
-      const dt = (ts - lastTs) / 1000;
-      lastTs = ts;
-
-      const maxScroll = node.scrollWidth - node.clientWidth;
-      const next = node.scrollLeft + direction * speedPxPerSecond * dt;
-      if (next >= maxScroll) {
-        node.scrollLeft = maxScroll;
-        direction = -1;
-      } else if (next <= 0) {
-        node.scrollLeft = 0;
-        direction = 1;
-      } else {
-        node.scrollLeft = next;
-      }
-      rafId = window.requestAnimationFrame(tick);
-    };
-
-    rafId = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(rafId);
-  }, [isVisible, isParentOpen, lightboxIndex, usableImages.length]);
 
   useEffect(() => {
     if (lightboxIndex === null) return;
@@ -192,8 +157,17 @@ export function ImageStrip({
           <figure className="flex flex-col items-center">
             <button
               type="button"
-              className="cursor-zoom-in bg-black/5"
-              onClick={() => openLightbox(0)}
+              className="group relative cursor-grab bg-black/5 active:cursor-grabbing"
+              onPointerDown={(e) => beginTapTracking(e.clientX, e.clientY)}
+              onPointerMove={(e) => updateTapTracking(e.clientX, e.clientY)}
+              onPointerCancel={cancelTapTracking}
+              onClick={(e) => {
+                if (shouldBlockTapOpen()) {
+                  e.preventDefault();
+                  return;
+                }
+                openLightbox(0);
+              }}
               aria-label="Open image in lightbox"
             >
               <img
@@ -216,6 +190,12 @@ export function ImageStrip({
                     : undefined
                 }
               />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute bottom-2 right-2 text-[length:var(--text-body)] leading-none text-white opacity-0 drop-shadow-[0_0_2px_rgba(0,0,0,0.45)] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+              >
+                +
+              </span>
             </button>
             {usableImages[0].caption ? (
               <figcaption className="mt-2 max-w-[22rem] text-left text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
@@ -225,48 +205,99 @@ export function ImageStrip({
           </figure>
         </div>
       ) : (
-        <div
-          ref={scrollerRef}
-          className="mt-6 -mx-1 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          <div className="flex w-max gap-3 px-1">
+        <div className="relative mt-6">
+          <button
+            type="button"
+            onClick={() => stripSwiperRef.current?.slidePrev(500)}
+            className="absolute left-0 top-1/2 z-10 -translate-y-1/2 px-2 py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-white drop-shadow-[0_0_2px_rgba(0,0,0,0.45)]"
+            aria-label="Previous strip image"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            onClick={() => stripSwiperRef.current?.slideNext(500)}
+            className="absolute right-0 top-1/2 z-10 -translate-y-1/2 px-2 py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-white drop-shadow-[0_0_2px_rgba(0,0,0,0.45)]"
+            aria-label="Next strip image"
+          >
+            ›
+          </button>
+          <Swiper
+            modules={[Autoplay, Mousewheel]}
+            loop
+            grabCursor
+            slidesPerView="auto"
+            spaceBetween={12}
+            speed={600}
+            mousewheel={{
+              enabled: true,
+              forceToAxis: true,
+              releaseOnEdges: true,
+            }}
+            autoplay={{
+              delay: 5000,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+            }}
+            className="-mx-1 px-1"
+            onSwiper={(instance) => {
+              stripSwiperRef.current = instance;
+            }}
+          >
             {usableImages.map((img, i) => (
-              <figure key={img.key} className="flex shrink-0 flex-col items-center">
-                <button
-                  type="button"
-                  className="shrink-0 cursor-zoom-in bg-black/5"
-                  onClick={() => openLightbox(i)}
-                  aria-label={`Open image ${i + 1} in lightbox`}
-                >
-                  <img
-                    src={img.url}
-                    alt={img.alt}
-                    loading="lazy"
-                    onLoad={() =>
-                      setLoadedKeys((prev) => ({ ...prev, [img.key]: true }))
-                    }
-                    className={`load-in-image ${frameHeightClass} block w-auto max-w-none object-contain transition-opacity duration-300 ${
-                      loadedKeys[img.key] ? "opacity-100" : "opacity-0"
-                    }`}
-                    style={
-                      !loadedKeys[img.key] && img.blurUrl
-                        ? {
-                            backgroundImage: `url(${img.blurUrl})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                          }
-                        : undefined
-                    }
-                  />
-                </button>
-                {img.caption ? (
-                  <figcaption className="mt-2 max-w-[22rem] text-left text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
-                    {img.caption}
-                  </figcaption>
-                ) : null}
-              </figure>
+              <SwiperSlide key={img.key} className="!w-auto">
+                <figure className="flex shrink-0 flex-col items-center">
+                  <button
+                    type="button"
+                    className="group relative shrink-0 cursor-grab bg-black/5 active:cursor-grabbing"
+                    onPointerDown={(e) => beginTapTracking(e.clientX, e.clientY)}
+                    onPointerMove={(e) => updateTapTracking(e.clientX, e.clientY)}
+                    onPointerCancel={cancelTapTracking}
+                    onClick={(e) => {
+                      if (shouldBlockTapOpen()) {
+                        e.preventDefault();
+                        return;
+                      }
+                      openLightbox(i);
+                    }}
+                    aria-label={`Open image ${i + 1} in lightbox`}
+                  >
+                    <img
+                      src={img.url}
+                      alt={img.alt}
+                      loading="lazy"
+                      onLoad={() =>
+                        setLoadedKeys((prev) => ({ ...prev, [img.key]: true }))
+                      }
+                      className={`load-in-image ${frameHeightClass} block w-auto max-w-none object-contain transition-opacity duration-300 ${
+                        loadedKeys[img.key] ? "opacity-100" : "opacity-0"
+                      }`}
+                      style={
+                        !loadedKeys[img.key] && img.blurUrl
+                          ? {
+                              backgroundImage: `url(${img.blurUrl})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                            }
+                          : undefined
+                      }
+                    />
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute bottom-2 right-2 text-[length:var(--text-body)] leading-none text-white opacity-0 drop-shadow-[0_0_2px_rgba(0,0,0,0.45)] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+                    >
+                      +
+                    </span>
+                  </button>
+                  {img.caption ? (
+                    <figcaption className="mt-2 max-w-[22rem] text-left text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
+                      {img.caption}
+                    </figcaption>
+                  ) : null}
+                </figure>
+              </SwiperSlide>
             ))}
-          </div>
+          </Swiper>
         </div>
       )}
 
@@ -338,7 +369,7 @@ export function ImageStrip({
                   <button
                     type="button"
                     onClick={goToPrevious}
-                    className="absolute left-0 top-1/2 z-20 -translate-y-1/2 px-4 py-1 text-[length:var(--text-body)] leading-none text-[var(--color-ink)]"
+                    className="absolute left-0 top-1/2 z-20 -translate-y-1/2 px-4 py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-[var(--color-ink)]"
                     aria-label="Previous image"
                   >
                     ‹
@@ -346,7 +377,7 @@ export function ImageStrip({
                   <button
                     type="button"
                     onClick={goToNext}
-                    className="absolute right-0 top-1/2 z-20 -translate-y-1/2 px-4 py-1 text-[length:var(--text-body)] leading-none text-[var(--color-ink)]"
+                    className="absolute right-0 top-1/2 z-20 -translate-y-1/2 px-4 py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-[var(--color-ink)]"
                     aria-label="Next image"
                   >
                     ›

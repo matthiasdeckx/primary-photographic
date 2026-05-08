@@ -38,7 +38,7 @@ export function ListingBanner({
 }: Props) {
   const titleAlignClass = stackBelowXl
     ? titleAlign === "center"
-      ? "text-left xl:text-center"
+      ? "w-full text-center xl:w-auto"
       : "text-left"
     : titleAlign === "center"
       ? "text-center"
@@ -57,14 +57,16 @@ export function ListingBanner({
   const contentWidthClass = stackBelowXl
     ? "mx-auto w-full max-w-site xl:max-w-none"
     : "";
+  const leftMetaAlignClass = stackBelowXl ? "text-center xl:text-left" : "text-left";
+  const rightMetaAlignClass = stackBelowXl ? "text-center xl:text-right" : "text-left xl:text-right";
 
   return (
     <FullBleed className={bleedClassName}>
       <div className="relative">
         <div className={`${contentWidthClass} ${grid} ${textClass} ${className}`}>
-          <span className={`min-w-0 text-left tabular-nums ${metaClass}`}>{left}</span>
+          <span className={`min-w-0 tabular-nums ${leftMetaAlignClass} ${metaClass}`}>{left}</span>
           <span className={`min-w-0 font-medium ${titleAlignClass}`}>{title}</span>
-          <span className={`min-w-0 text-left xl:text-right ${metaClass}`}>{right}</span>
+          <span className={`min-w-0 ${rightMetaAlignClass} ${metaClass}`}>{right}</span>
           {end != null ? (
             <span className="shrink-0 justify-self-end tabular-nums">{end}</span>
           ) : null}
