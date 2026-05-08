@@ -27,11 +27,20 @@ export type HomeFeatureSlide = {
  * - two stacked images on the right
  * Keep deterministic positions across slides (no random drift).
  */
-const baseSlots = [
+type HomeFeatureSlot = {
+  top?: number;
+  bottom?: string;
+  left?: number;
+  right?: number;
+  width: number;
+  ratio: string;
+};
+
+const baseSlots: HomeFeatureSlot[] = [
   { top: 14, left: 1.5, width: 20.5, ratio: "4 / 5" },
   { top: 12, right: 1.5, width: 15, ratio: "4 / 5" },
   { bottom: "calc(var(--site-footer-height, 260px) + 44px)", right: 1.5, width: 24.5, ratio: "4 / 3" },
-] as const;
+];
 
 function wrapIndex(index: number, total: number): number {
   if (total <= 0) return 0;
