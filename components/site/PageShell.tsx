@@ -20,6 +20,7 @@ type Props = {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  addressGoogleMapsUrl?: string | null;
   footerAddressLeft?: string | null;
   footerAddressRight?: string | null;
   hours?: string | null;
@@ -39,6 +40,7 @@ export function PageShell({
   email,
   phone,
   address,
+  addressGoogleMapsUrl,
   footerAddressLeft,
   footerAddressRight,
   hours,
@@ -62,6 +64,7 @@ export function PageShell({
         email={email}
         phone={phone}
         address={address}
+        addressGoogleMapsUrl={addressGoogleMapsUrl}
         footerAddressLeft={footerAddressLeft}
         footerAddressRight={footerAddressRight}
         hours={hours}

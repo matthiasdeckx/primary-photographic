@@ -31,6 +31,9 @@
   --text-small: 13px;
   --leading: 1.2;
   --space-scale: 1;
+  /* Horizontal / vertical page gutter (Tailwind p-4); tightens on narrow screens */
+  --site-gutter-x: 1rem;
+  --site-gutter-y: 1rem;
 }
 
 @media (max-width: 540px) {
@@ -46,19 +49,12 @@
 
 @media (max-width: 480px) {
   :root {
-    --text-body: 21px !important;
-    --space-scale: 0.84;
-  }
-  html,
-  body {
-    font-size: 21px;
-  }
-}
-
-@media (max-width: 340px) {
-  :root {
     --text-body: 20px !important;
-    --space-scale: 0.76;
+    --text-small: 12px !important;
+    /* ~20/26, aligned with how body scales from the desktop base */
+    --space-scale: 0.77;
+    --site-gutter-x: 0.5rem;
+    --site-gutter-y: 0.5rem;
   }
   html,
   body {

@@ -71,6 +71,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       email={settings?.contactEmail}
       phone={settings?.contactPhone}
       address={settings?.address}
+      addressGoogleMapsUrl={settings?.addressGoogleMapsUrl}
       footerAddressLeft={settings?.footerAddressLeft}
       footerAddressRight={settings?.footerAddressRight}
       hours={settings?.openingHours}

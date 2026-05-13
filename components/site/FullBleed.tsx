@@ -10,7 +10,7 @@ type Props = {
 export function FullBleed({ children, className = "", padded = true }: Props) {
   return (
     <div
-      className={`box-border w-screen max-w-[100vw] shrink-0 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] ${padded ? "px-4 sm:px-4" : ""} ${className}`}
+      className={`box-border w-screen max-w-[100vw] shrink-0 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] ${padded ? "px-[var(--site-gutter-x)]" : ""} ${className}`}
     >
       {children}
     </div>

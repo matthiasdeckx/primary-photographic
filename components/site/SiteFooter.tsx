@@ -9,12 +9,34 @@ import { PortableBody } from "@/components/content/PortableBody";
 import { LabClock } from "@/components/site/LabClock";
 import type { LabClockSchedule } from "@/lib/labHours";
 
+function distanceFromBottomPx(): number {
+  if (typeof document === "undefined") return Infinity;
+  const root = document.documentElement;
+  const vv = window.visualViewport;
+  const scrollBottom =
+    vv != null
+      ? window.scrollY + vv.offsetTop + vv.height
+      : window.scrollY + window.innerHeight;
+  return root.scrollHeight - scrollBottom;
+}
+
+function readScrollY(): number {
+  if (typeof window === "undefined") return 0;
+  return (
+    window.scrollY ||
+    document.documentElement.scrollTop ||
+    document.body.scrollTop ||
+    0
+  );
+}
+
 type Props = {
   siteTitle?: string | null;
   footerBody?: PortableTextBlock[] | null;
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  addressGoogleMapsUrl?: string | null;
   footerAddressLeft?: string | null;
   footerAddressRight?: string | null;
   hours?: string | null;
@@ -27,6 +49,7 @@ export function SiteFooter({
   email,
   phone,
   address,
+  addressGoogleMapsUrl,
   footerAddressLeft,
   footerAddressRight,
   hours,
@@ -46,9 +69,8 @@ export function SiteFooter({
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [scrollNearBottom, setScrollNearBottom] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
-  const [desktopUpScrollReveal, setDesktopUpScrollReveal] = useState(false);
-  const desktopRevealStartYRef = useRef<number | null>(null);
-  const nearBottomActivationYRef = useRef<number | null>(null);
+  /** Scroll-up lifts footer content; scroll-down clears it (unless near-bottom or menu keeps it open). */
+  const [scrollLiftOpen, setScrollLiftOpen] = useState(false);
 
   /* Backup — frost layer: re-enable with footerFullyInView + showFooterFrost block below.
   const [footerFullyInView, setFooterFullyInView] = useState(false);
@@ -57,7 +79,11 @@ export function SiteFooter({
   useEffect(() => {
     const onMenuChange = (event: Event) => {
       const detail = (event as CustomEvent<{ open?: boolean }>).detail;
-      setMenuOpenSync(Boolean(detail?.open));
+      const open = Boolean(detail?.open);
+      setMenuOpenSync(open);
+      if (!open) {
+        setScrollLiftOpen(false);
+      }
     };
     window.addEventListener("site-menu-open-change", onMenuChange);
     return () => window.removeEventListener("site-menu-open-change", onMenuChange);
@@ -80,113 +106,82 @@ export function SiteFooter({
   }, []);
 
   /**
-   * Near-bottom for non-home: drives footer intro + mobile expanded chrome.
-   * Uses hysteresis + ignoring layout-only updates while latched to avoid oscillation when
-   * the fixed footer expands/collapses and changes document scrollHeight (ResizeObserver was
-   * firing that loop on mobile).
+   * Near-bottom: gap-only hysteresis (no scroll-anchor latch — avoids stuck state on navigate).
    */
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isHome || prefersReducedMotion) {
       setScrollNearBottom(false);
-      nearBottomActivationYRef.current = null;
       return;
     }
 
     const ENTER_PX = 72;
     const EXIT_PX = 160;
-    const EXIT_UP_SCROLL_PX = 96;
 
-    const distanceFromBottom = () => {
-      const root = document.documentElement;
-      const vv = window.visualViewport;
-      const viewH = vv?.height ?? window.innerHeight;
-      const scrollBottom = window.scrollY + viewH;
-      return root.scrollHeight - scrollBottom;
-    };
-
-    const apply = (fromLayoutOnly: boolean) => {
-      const gap = distanceFromBottom();
-      const y = window.scrollY;
-
+    const update = () => {
+      const gap = distanceFromBottomPx();
       setScrollNearBottom((prev) => {
-        if (fromLayoutOnly && prev) {
-          return true;
-        }
-        if (prev) {
-          const anchorY = nearBottomActivationYRef.current ?? y;
-          const scrolledUpEnough = anchorY - y >= EXIT_UP_SCROLL_PX;
-          if (gap > EXIT_PX && scrolledUpEnough) {
-            nearBottomActivationYRef.current = null;
-            return false;
-          }
-          return true;
-        }
-        if (gap <= ENTER_PX) {
-          nearBottomActivationYRef.current = y;
-          return true;
-        }
-        return false;
+        if (!prev) return gap <= ENTER_PX;
+        return gap <= EXIT_PX;
       });
     };
 
-    const onScroll = () => apply(false);
-    const onLayout = () => apply(true);
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) update();
+    };
 
-    apply(false);
+    update();
+    const raf = requestAnimationFrame(update);
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onLayout);
-    const vv = window.visualViewport;
-    vv?.addEventListener("resize", onLayout);
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    window.addEventListener("pageshow", onPageShow);
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onLayout);
-      vv?.removeEventListener("resize", onLayout);
-      nearBottomActivationYRef.current = null;
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      window.removeEventListener("pageshow", onPageShow);
+      setScrollNearBottom(false);
     };
   }, [isHome, pathname, prefersReducedMotion]);
 
-  /** Desktop "reverse sticky" behavior: reveal full footer while scrolling up. */
+  /**
+   * Scroll direction → footer body: scroll up opens, scroll down closes.
+   * All viewports (not only lg). Cleared on menu close (above) and route change (cleanup).
+   */
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!isDesktopViewport || isHome || prefersReducedMotion) {
-      setDesktopUpScrollReveal(false);
-      desktopRevealStartYRef.current = null;
+    if (isHome || prefersReducedMotion) {
+      setScrollLiftOpen(false);
       return;
     }
 
-    let lastY = window.scrollY;
-    const minDelta = 8;
-    const topReset = 40;
-    const hideAfterDownscrollPx = 60;
+    let lastY = readScrollY();
+    const MIN_DELTA = 6;
 
     const onScroll = () => {
-      const y = window.scrollY;
+      const y = readScrollY();
       const delta = y - lastY;
-      if (Math.abs(delta) < minDelta) return;
-
-      if (delta < 0 && y > topReset) {
-        setDesktopUpScrollReveal(true);
-        desktopRevealStartYRef.current = y;
-      } else if (delta > 0) {
-        const startY = desktopRevealStartYRef.current;
-        if (startY != null && y - startY >= hideAfterDownscrollPx) {
-          setDesktopUpScrollReveal(false);
-          desktopRevealStartYRef.current = null;
-        }
-      }
-
       lastY = y;
+      if (Math.abs(delta) < MIN_DELTA) return;
+      if (delta < 0) setScrollLiftOpen(true);
+      else setScrollLiftOpen(false);
+    };
+
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) lastY = readScrollY();
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("pageshow", onPageShow);
+
     return () => {
       window.removeEventListener("scroll", onScroll);
-      desktopRevealStartYRef.current = null;
+      window.removeEventListener("pageshow", onPageShow);
+      setScrollLiftOpen(false);
     };
-  }, [isDesktopViewport, isHome, prefersReducedMotion]);
+  }, [isHome, prefersReducedMotion, pathname]);
 
   /* Backup — frost: tracks when footer is fully in viewport (used for frosted backdrop).
   useEffect(() => {
@@ -225,17 +220,18 @@ export function SiteFooter({
     prefersReducedMotion ||
     menuOpenSync ||
     scrollNearBottom ||
-    desktopUpScrollReveal;
+    scrollLiftOpen;
 
-  /** Below lg: show only the address strip until menu opens or near bottom (plus home / reduced-motion). */
+  /** Below lg: show only the address strip until menu opens, near bottom, or scroll-up lift. */
   const showMobileFooterExpanded =
     menuOpenSync ||
     scrollNearBottom ||
+    scrollLiftOpen ||
     isHome ||
     prefersReducedMotion;
 
   const showFooterBackground = isDesktopViewport
-    ? !isHome && (desktopUpScrollReveal || scrollNearBottom || menuOpenSync)
+    ? !isHome && (scrollLiftOpen || scrollNearBottom || menuOpenSync)
     : true;
 
   /* Backup — frost visibility gate:
@@ -313,6 +309,18 @@ export function SiteFooter({
     "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.25) 4%, black 10%)";
   */
 
+  const addressMapsHref = addressGoogleMapsUrl?.trim() ?? "";
+
+  const footerAddressRow = (
+    <div
+      className="flex w-full items-baseline justify-between text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]"
+      style={{ gap: "calc(1rem * var(--space-scale, 1))" }}
+    >
+      <p className="text-left">{footerAddressLeft || "\u00a0"}</p>
+      <p className="text-right">{footerAddressRight || "\u00a0"}</p>
+    </div>
+  );
+
   return (
     <footer
       ref={footerRef}
@@ -340,10 +348,9 @@ export function SiteFooter({
       */}
       <div className="relative z-10">
       <div
-        className="relative w-full px-4 lg:pt-10"
+        className="relative w-full px-[var(--site-gutter-x)] pb-[calc(1rem*var(--space-scale))] max-lg:pb-[calc(1rem*var(--space-scale)+env(safe-area-inset-bottom,0px)+12px)] lg:pt-10"
         style={{
           paddingTop: "calc(1rem * var(--space-scale, 1))",
-          paddingBottom: "calc(1rem * var(--space-scale, 1))",
         }}
       >
         <div className="mx-auto w-full max-w-site lg:max-w-none">
@@ -353,7 +360,7 @@ export function SiteFooter({
             }`}
           >
             <div
-              className="pointer-events-none mb-4 grid w-full grid-cols-1 items-end gap-y-2 lg:absolute lg:inset-x-0 lg:bottom-4 lg:mb-0 lg:grid-cols-[1fr_auto] lg:gap-y-0 lg:px-4"
+              className="pointer-events-none mb-4 grid w-full grid-cols-1 items-end gap-y-2 lg:absolute lg:inset-x-0 lg:bottom-4 lg:mb-0 lg:grid-cols-[1fr_auto] lg:gap-y-0 lg:px-[var(--site-gutter-x)]"
               style={{
                 gap: "calc(1rem * var(--space-scale, 1))",
               }}
@@ -439,7 +446,7 @@ export function SiteFooter({
         <div
           data-footer-body-region
           aria-hidden={!showFooterBodyParagraph}
-          className={`mx-auto w-full max-w-site pb-4 text-justify transition-opacity duration-200 ease-out motion-reduce:transition-none ${
+          className={`mx-auto w-full max-w-site pb-[var(--site-gutter-y)] text-justify transition-opacity duration-200 ease-out motion-reduce:transition-none ${
             showFooterBodyParagraph
               ? "opacity-100"
               : "pointer-events-none opacity-0"
@@ -465,9 +472,19 @@ export function SiteFooter({
                   <>
                     {" "}
                     Located at{" "}
-                    <strong className="font-medium whitespace-pre-line">
-                      {address}
-                    </strong>
+                    {addressMapsHref ? (
+                      <a
+                        href={addressMapsHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="View address on Google Maps"
+                        className="font-medium text-[var(--color-ink)] no-underline hover:opacity-60"
+                      >
+                        <strong className="font-medium whitespace-pre-line">{address}</strong>
+                      </a>
+                    ) : (
+                      <strong className="font-medium whitespace-pre-line">{address}</strong>
+                    )}
                     .
                   </>
                 ) : null}
@@ -516,13 +533,19 @@ export function SiteFooter({
         {(footerAddressLeft || footerAddressRight) && (
           <div className="mx-auto mt-0 w-full max-w-site">
             <div className="mx-auto w-full max-w-3xl">
-              <div
-                className="flex w-full items-baseline justify-between text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]"
-                style={{ gap: "calc(1rem * var(--space-scale, 1))" }}
-              >
-                <p className="text-left">{footerAddressLeft || "\u00a0"}</p>
-                <p className="text-right">{footerAddressRight || "\u00a0"}</p>
-              </div>
+              {addressMapsHref ? (
+                <a
+                  href={addressMapsHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="View address on Google Maps"
+                  className="block text-[var(--color-ink)] no-underline hover:opacity-60"
+                >
+                  {footerAddressRow}
+                </a>
+              ) : (
+                footerAddressRow
+              )}
             </div>
           </div>
         )}

@@ -191,6 +191,13 @@ export const siteSettings = defineType({
       rows: 3,
     }),
     defineField({
+      name: "addressGoogleMapsUrl",
+      title: "Google Maps link (address)",
+      type: "url",
+      description:
+        "Optional. Opens when visitors tap the address in the footer (main paragraph and bottom address row). Paste a Google Maps place or directions URL.",
+    }),
+    defineField({
       name: "footerAddressLeft",
       title: "Footer address row — left",
       type: "string",

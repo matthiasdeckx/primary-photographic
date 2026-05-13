@@ -193,7 +193,7 @@ export function HomeFeatureSlides({ slides }: { slides: HomeFeatureSlide[] }) {
                 style={{ opacity: imageIndex === mobileImageIndex ? 1 : 0 }}
                 aria-hidden={imageIndex !== mobileImageIndex}
               >
-                <div className="box-border flex h-full w-full items-center justify-center px-4">
+                <div className="box-border flex h-full w-full items-center justify-center px-[var(--site-gutter-x)]">
                   <div className="relative h-[min(62vh,640px)] w-[min(88vw,640px)] overflow-hidden">
                     <Image
                       src={image.url}

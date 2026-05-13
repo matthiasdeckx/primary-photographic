@@ -231,7 +231,7 @@ export function SiteHeader({
       ) : null}
       {/* Does not reserve layout height — menu sits high; utility links stay tappable in the corners. */}
       <div
-        className="pointer-events-none fixed inset-x-0 top-0 z-[60] hidden items-start justify-between px-4 lg:flex"
+        className="pointer-events-none fixed inset-x-0 top-0 z-[60] hidden items-start justify-between px-[var(--site-gutter-x)] lg:flex"
         style={{
           gap: "calc(1rem * var(--space-scale, 1))",
           paddingTop: "calc(1rem * var(--space-scale, 1))",
@@ -267,7 +267,7 @@ export function SiteHeader({
 
       <div
         ref={chromeRef}
-        className={`relative z-50 flex w-full flex-col px-4 ${menuOpen ? "pb-0" : ""}`}
+        className={`relative z-50 flex w-full flex-col px-[var(--site-gutter-x)] ${menuOpen ? "pb-0" : ""}`}
         onPointerEnter={handleChromePointerEnter}
         onPointerLeave={handleChromePointerLeave}
         style={{
@@ -297,13 +297,13 @@ export function SiteHeader({
               {menuOpen ? (
                 <div
                   id="primary-menu-panel"
-                  className="absolute inset-x-0 top-full z-10 select-none bg-[var(--color-ink)] px-4 text-white"
+                  className="absolute inset-x-0 top-full z-10 select-none bg-[var(--color-ink)] px-[var(--site-gutter-x)] text-white"
                   style={{
                     paddingTop: "calc(1rem * var(--space-scale, 1))",
                     paddingBottom: "calc(1rem * var(--space-scale, 1))",
                   }}
                 >
-                  <nav aria-label="Primary" className="py-4">
+                  <nav aria-label="Primary" className="py-[var(--site-gutter-y)]">
                     <ul
                       data-site-menu-nav
                       className="flex flex-col items-center"

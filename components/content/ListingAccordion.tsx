@@ -71,7 +71,7 @@ export function ListingAccordion({ items }: { items: ListingEntry[] }) {
               titleAlign="center"
               metaTone="mutedInteractive"
               stackBelowXl
-              bleedClassName="py-4"
+              bleedClassName="py-[var(--site-gutter-y)]"
               overlay={
                 <div
                   aria-hidden

@@ -320,7 +320,7 @@ export function ImageStrip({
               >
                 {title?.trim() ? (
                   <p
-                    className="pointer-events-none absolute left-0 z-20 max-w-[70vw] truncate px-4 text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
+                    className="pointer-events-none absolute left-0 z-20 max-w-[70vw] truncate px-[var(--site-gutter-x)] text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
                     style={{
                       top: `calc(${uiInset} + env(safe-area-inset-top, 0px))`,
                     }}
@@ -331,7 +331,7 @@ export function ImageStrip({
                 <button
                   type="button"
                   onClick={closeLightbox}
-                  className="absolute right-0 z-20 px-4 text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
+                  className="absolute right-0 z-20 px-[var(--site-gutter-x)] text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
                   style={{
                     top: `calc(${uiInset} + env(safe-area-inset-top, 0px))`,
                   }}
@@ -369,7 +369,7 @@ export function ImageStrip({
                   <button
                     type="button"
                     onClick={goToPrevious}
-                    className="absolute left-0 top-1/2 z-20 -translate-y-1/2 px-4 py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-[var(--color-ink)]"
+                    className="absolute left-0 top-1/2 z-20 -translate-y-1/2 px-[var(--site-gutter-x)] py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-[var(--color-ink)]"
                     aria-label="Previous image"
                   >
                     ‹
@@ -377,7 +377,7 @@ export function ImageStrip({
                   <button
                     type="button"
                     onClick={goToNext}
-                    className="absolute right-0 top-1/2 z-20 -translate-y-1/2 px-4 py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-[var(--color-ink)]"
+                    className="absolute right-0 top-1/2 z-20 -translate-y-1/2 px-[var(--site-gutter-x)] py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-[var(--color-ink)]"
                     aria-label="Next image"
                   >
                     ›
@@ -398,7 +398,7 @@ export function ImageStrip({
                 </div>
                 {usableImages[lightboxIndex].caption ? (
                   <div
-                    className="pointer-events-none absolute left-1/2 z-20 min-h-[1.2em] -translate-x-1/2 px-4 text-center text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
+                    className="pointer-events-none absolute left-1/2 z-20 min-h-[1.2em] -translate-x-1/2 px-[var(--site-gutter-x)] text-center text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
                     style={{
                       bottom: `calc(${uiInset} + env(safe-area-inset-bottom, 0px))`,
                     }}
@@ -407,7 +407,7 @@ export function ImageStrip({
                   </div>
                 ) : null}
                 <div
-                  className="pointer-events-none absolute right-0 z-20 px-4 text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
+                  className="pointer-events-none absolute right-0 z-20 px-[var(--site-gutter-x)] text-[length:var(--text-small)] uppercase leading-[1.2em] text-[var(--color-ink)]"
                   style={{
                     bottom: `calc(${uiInset} + env(safe-area-inset-bottom, 0px))`,
                   }}

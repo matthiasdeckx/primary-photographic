@@ -50,7 +50,7 @@ export function PageShellMain({ children }: Props) {
   return (
     <div
       data-page-shell-main
-      className="relative w-full flex-1 px-4 pb-[calc(var(--site-footer-height,260px)+1rem)]"
+      className="relative w-full flex-1 px-[var(--site-gutter-x)] pb-[calc(var(--site-footer-height,260px)+var(--site-gutter-y))]"
       style={style}
     >
       {/* <div
