@@ -106,7 +106,9 @@ export function SiteFooter({
   }, []);
 
   /**
-   * Near-bottom: gap-only hysteresis (no scroll-anchor latch — avoids stuck state on navigate).
+   * Near-bottom: gap-only hysteresis. On narrow viewports, coalesce scroll updates (rAF) and
+   * debounce resize/visualViewport — iOS fires both rapidly (rubber band + URL bar), which was
+   * toggling `scrollNearBottom` every frame and flickering the footer.
    */
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -115,8 +117,10 @@ export function SiteFooter({
       return;
     }
 
-    const ENTER_PX = 72;
-    const EXIT_PX = 160;
+    const narrow = !isDesktopViewport;
+    const ENTER_PX = narrow ? 90 : 72;
+    const EXIT_PX = narrow ? 200 : 160;
+    const RESIZE_DEBOUNCE_MS = 180;
 
     const update = () => {
       const gap = distanceFromBottomPx();
@@ -126,6 +130,32 @@ export function SiteFooter({
       });
     };
 
+    let rafId = 0;
+    const onScrollCoalesced = () => {
+      if (!narrow) {
+        update();
+        return;
+      }
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        update();
+      });
+    };
+
+    let resizeTimer: number | null = null;
+    const onResizeDebounced = () => {
+      if (!narrow) {
+        update();
+        return;
+      }
+      if (resizeTimer) window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        resizeTimer = null;
+        update();
+      }, RESIZE_DEBOUNCE_MS);
+    };
+
     const onPageShow = (e: PageTransitionEvent) => {
       if (e.persisted) update();
     };
@@ -133,32 +163,44 @@ export function SiteFooter({
     update();
     const raf = requestAnimationFrame(update);
 
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
+    window.addEventListener("scroll", onScrollCoalesced, { passive: true });
+    window.addEventListener("resize", onResizeDebounced);
+    const vv = window.visualViewport;
+    if (narrow && vv) {
+      vv.addEventListener("resize", onResizeDebounced);
+      vv.addEventListener("scroll", onScrollCoalesced);
+    } else if (vv) {
+      vv.addEventListener("resize", onResizeDebounced);
+    }
     window.addEventListener("pageshow", onPageShow);
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
+      if (rafId) cancelAnimationFrame(rafId);
+      if (resizeTimer) window.clearTimeout(resizeTimer);
+      window.removeEventListener("scroll", onScrollCoalesced);
+      window.removeEventListener("resize", onResizeDebounced);
       window.removeEventListener("pageshow", onPageShow);
+      vv?.removeEventListener("resize", onResizeDebounced);
+      vv?.removeEventListener("scroll", onScrollCoalesced);
       setScrollNearBottom(false);
     };
-  }, [isHome, pathname, prefersReducedMotion]);
+  }, [isHome, pathname, prefersReducedMotion, isDesktopViewport]);
 
   /**
-   * Scroll direction → footer body: scroll up opens, scroll down closes.
-   * All viewports (not only lg). Cleared on menu close (above) and route change (cleanup).
+   * Scroll direction → expand footer: desktop only. On touch / narrow viewports, scroll-up/down
+   * was flipping every frame during iOS momentum + rubber-band → footer flicker.
+   * Mobile expanded chrome still uses near-bottom + menu (+ home).
    */
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (isHome || prefersReducedMotion) {
+    if (!isDesktopViewport || isHome || prefersReducedMotion) {
       setScrollLiftOpen(false);
       return;
     }
 
     let lastY = readScrollY();
-    const MIN_DELTA = 6;
+    const MIN_DELTA = 8;
 
     const onScroll = () => {
       const y = readScrollY();
@@ -181,7 +223,7 @@ export function SiteFooter({
       window.removeEventListener("pageshow", onPageShow);
       setScrollLiftOpen(false);
     };
-  }, [isHome, prefersReducedMotion, pathname]);
+  }, [isDesktopViewport, isHome, prefersReducedMotion, pathname]);
 
   /* Backup — frost: tracks when footer is fully in viewport (used for frosted backdrop).
   useEffect(() => {
@@ -215,24 +257,30 @@ export function SiteFooter({
   }, [pathname]);
   */
 
+  /**
+   * Full footer copy: on mobile home, only when menu is open (not by default). Desktop home keeps always-on.
+   */
   const showFooterBodyParagraph =
-    isHome ||
     prefersReducedMotion ||
     menuOpenSync ||
     scrollNearBottom ||
-    scrollLiftOpen;
+    scrollLiftOpen ||
+    (isHome && isDesktopViewport);
 
-  /** Below lg: show only the address strip until menu opens, near bottom, or scroll-up lift. */
+  /** Below lg: expanded chrome; same rule as body — no default-on for mobile home. */
   const showMobileFooterExpanded =
     menuOpenSync ||
     scrollNearBottom ||
     scrollLiftOpen ||
-    isHome ||
-    prefersReducedMotion;
+    prefersReducedMotion ||
+    (isHome && isDesktopViewport);
 
+  /**
+   * White backing: desktop unchanged. Mobile: hidden on home until menu (or non-home page / near-bottom).
+   */
   const showFooterBackground = isDesktopViewport
-    ? !isHome && (scrollLiftOpen || scrollNearBottom || menuOpenSync)
-    : true;
+    ? isHome || menuOpenSync || scrollLiftOpen || scrollNearBottom
+    : !isHome || menuOpenSync || scrollNearBottom || scrollLiftOpen;
 
   /* Backup — frost visibility gate:
   const showFooterFrost = footerFullyInView && showFooterBodyParagraph;
@@ -326,6 +374,7 @@ export function SiteFooter({
       ref={footerRef}
       className="home-intro-ui fixed inset-x-0 bottom-0 z-40 w-full overflow-hidden"
       data-site-footer
+      data-footer-menu-open={menuOpenSync ? "" : undefined}
     >
       <div
         aria-hidden
@@ -530,7 +579,8 @@ export function SiteFooter({
             )}
         </div>
 
-        {(footerAddressLeft || footerAddressRight) && (
+        {(footerAddressLeft || footerAddressRight) &&
+          (!isHome || isDesktopViewport || menuOpenSync || prefersReducedMotion) && (
           <div className="mx-auto mt-0 w-full max-w-site">
             <div className="mx-auto w-full max-w-3xl">
               {addressMapsHref ? (

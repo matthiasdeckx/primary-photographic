@@ -118,6 +118,12 @@ body:has([data-home-sequence]) .home-intro-ui {
   animation: home-ui-intro 1040ms ease 1240ms both;
 }
 
+/* Keep stagger intact; if menu opens during intro, footer must appear immediately. */
+body:has([data-home-sequence]) [data-site-footer][data-footer-menu-open].home-intro-ui {
+  opacity: 1 !important;
+  animation: none !important;
+}
+
 @keyframes load-in-fade-scale {
   from {
     opacity: 0;
