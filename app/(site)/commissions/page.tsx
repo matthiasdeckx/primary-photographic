@@ -36,7 +36,7 @@ export default async function CommissionsPage() {
 
       {featured ? (
         <section
-          className="space-y-8 scroll-mt-40"
+          className="listing-scroll-target space-y-8"
           id={listingAnchorId(featured._id)}
           aria-label="Featured commission"
         >

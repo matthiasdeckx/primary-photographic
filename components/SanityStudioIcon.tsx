@@ -1,9 +1,16 @@
+const studioIconOrigin =
+  (typeof process !== "undefined" &&
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "")) ||
+  "https://www.primaryphotographic.com";
+
 export function SanityStudioIcon() {
+  const src = `${studioIconOrigin}/icon.png`;
+
   return (
     <img
       alt=""
       height={25}
-      src="/icon.png"
+      src={src}
       style={{
         borderRadius: 4,
         display: "block",

@@ -113,14 +113,16 @@ body:has([data-home-sequence]) .home-intro-logo {
   animation: home-logo-intro 1400ms cubic-bezier(0.22, 1, 0.36, 1) 640ms both;
 }
 
-body:has([data-home-sequence]) .home-intro-ui {
+/* Header/menu chrome only — footer must not join this intro (menu close restarts it → footer vanishes). */
+body:has([data-home-sequence]) .home-intro-ui:not([data-site-footer]) {
   opacity: 0;
   animation: home-ui-intro 1040ms ease 1240ms both;
 }
 
-/* Keep stagger intact; if menu opens during intro, footer must appear immediately. */
-body:has([data-home-sequence]) [data-site-footer][data-footer-menu-open].home-intro-ui {
+body:has([data-home-sequence]) [data-site-footer],
+body:has([data-home-sequence]) [data-site-footer][data-footer-menu-open] {
   opacity: 1 !important;
+  visibility: visible !important;
   animation: none !important;
 }
 
@@ -213,12 +215,35 @@ p[class*="text-[length:var(--text-small)]"] {
   will-change: opacity;
 }
 
-[data-site-menu-nav]:has(> li:hover) > li:not(:hover),
-[data-site-menu-nav]:has(> li:focus-within) > li:not(:focus-within) {
-  opacity: 0.35;
+/* Menu + listing sibling fades: fine-pointer hover only (avoids stuck :hover on touch). */
+@media (hover: hover) and (pointer: fine) {
+  [data-site-menu-nav]:has(> li:hover) > li:not(:hover),
+  [data-site-menu-nav]:has(> li:focus-within) > li:not(:focus-within) {
+    opacity: 0.35;
+  }
+
+  /* Events/commissions rows: fade sibling rows on hover/focus */
+  [data-listing-row-list]:hover > .listing-row-item,
+  [data-listing-row-list]:focus-within > .listing-row-item {
+    opacity: 0.35;
+  }
+
+  [data-listing-row-list] > .listing-row-item:hover,
+  [data-listing-row-list] > .listing-row-item:focus-within {
+    opacity: 1;
+  }
+
+  .listing-row-item summary.group:hover .listing-meta-interactive,
+  .listing-row-item summary.group:focus-within .listing-meta-interactive {
+    color: var(--color-ink);
+  }
 }
 
-/* Events/commissions rows: fade sibling rows on hover/focus */
+.listing-scroll-target,
+[data-listing-row-list] > .listing-row-item {
+  scroll-margin-top: calc(var(--site-header-height, 280px) + 0.75rem);
+}
+
 [data-listing-row-list] > .listing-row-item {
   transition: opacity 0.25s ease;
 }
@@ -227,18 +252,6 @@ p[class*="text-[length:var(--text-small)]"] {
   [data-listing-row-list] > .listing-row-item {
     transition: none;
   }
-}
-
-/* Browser-safe sibling fade without :has():
-   dim all when container is active, then restore hovered/focused row */
-[data-listing-row-list]:hover > .listing-row-item,
-[data-listing-row-list]:focus-within > .listing-row-item {
-  opacity: 0.35;
-}
-
-[data-listing-row-list] > .listing-row-item:hover,
-[data-listing-row-list] > .listing-row-item:focus-within {
-  opacity: 1;
 }
 
 html.home-no-scroll,

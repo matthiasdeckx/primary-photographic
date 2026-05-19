@@ -52,7 +52,9 @@ export function ListingBanner({
       : "grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2 sm:gap-x-3 md:grid-cols-[1fr_minmax(0,2.5fr)_1fr] md:gap-x-4";
   const metaClass =
     metaTone === "mutedInteractive"
-      ? "text-[var(--color-muted)] group-hover:text-[var(--color-ink)] group-focus-within:text-[var(--color-ink)] [details[open]_&]:text-[var(--color-ink)]"
+      ? stackBelowXl
+        ? "listing-meta-interactive text-[var(--color-ink)] xl:text-[var(--color-muted)] xl:[details[open]_&]:text-[var(--color-ink)]"
+        : "listing-meta-interactive text-[var(--color-muted)] [details[open]_&]:text-[var(--color-ink)]"
       : "";
   const contentWidthClass = stackBelowXl
     ? "mx-auto w-full max-w-site xl:max-w-none"

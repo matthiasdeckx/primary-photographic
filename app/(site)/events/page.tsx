@@ -38,7 +38,7 @@ export default async function EventsPage() {
           <details
             key={item._id}
             id={listingAnchorId(item._id)}
-            className="listing-row-item scroll-mt-40"
+            className="listing-row-item listing-scroll-target"
           >
             <summary className="group cursor-pointer list-none [&::-webkit-details-marker]:hidden">
               <EventRow item={item} />

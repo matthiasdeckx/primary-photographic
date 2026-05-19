@@ -257,30 +257,38 @@ export function SiteFooter({
   }, [pathname]);
   */
 
-  /**
-   * Full footer copy: on mobile home, only when menu is open (not by default). Desktop home keeps always-on.
-   */
-  const showFooterBodyParagraph =
+  const footerRevealed =
     prefersReducedMotion ||
     menuOpenSync ||
     scrollNearBottom ||
-    scrollLiftOpen ||
-    (isHome && isDesktopViewport);
+    scrollLiftOpen;
 
-  /** Below lg: expanded chrome; same rule as body — no default-on for mobile home. */
-  const showMobileFooterExpanded =
-    menuOpenSync ||
-    scrollNearBottom ||
-    scrollLiftOpen ||
-    prefersReducedMotion ||
-    (isHome && isDesktopViewport);
+  /** Desktop: home always full; inner pages reveal on scroll / menu / near-bottom. */
+  const desktopShowFullFooter = isHome || footerRevealed;
 
-  /**
-   * White backing: desktop unchanged. Mobile: hidden on home until menu (or non-home page / near-bottom).
-   */
-  const showFooterBackground = isDesktopViewport
-    ? isHome || menuOpenSync || scrollLiftOpen || scrollNearBottom
-    : !isHome || menuOpenSync || scrollNearBottom || scrollLiftOpen;
+  /** Mobile: home → menu only; inner pages → menu / near-bottom / scroll. */
+  const mobileShowFullFooter = isHome
+    ? menuOpenSync || prefersReducedMotion
+    : footerRevealed;
+
+  const footerBackdropClass = [
+    desktopShowFullFooter ? "lg:opacity-100" : "lg:opacity-0",
+    mobileShowFullFooter ? "max-lg:opacity-100" : "max-lg:opacity-0",
+  ].join(" ");
+
+  const footerBodyClass = [
+    desktopShowFullFooter
+      ? "lg:pointer-events-auto lg:max-h-none lg:overflow-visible lg:opacity-100 lg:pb-[var(--site-gutter-y)]"
+      : "lg:pointer-events-none lg:max-h-0 lg:overflow-hidden lg:opacity-0 lg:pb-0",
+    mobileShowFullFooter
+      ? "max-lg:pointer-events-auto max-lg:max-h-none max-lg:overflow-visible max-lg:opacity-100 max-lg:pb-[var(--site-gutter-y)]"
+      : "max-lg:pointer-events-none max-lg:max-h-0 max-lg:overflow-hidden max-lg:opacity-0 max-lg:pb-0 max-lg:hidden",
+  ].join(" ");
+
+  const footerChromeClass = [
+    desktopShowFullFooter ? "" : "lg:hidden",
+    mobileShowFullFooter ? "" : "max-lg:hidden",
+  ].join(" ");
 
   /* Backup — frost visibility gate:
   const showFooterFrost = footerFullyInView && showFooterBodyParagraph;
@@ -372,15 +380,14 @@ export function SiteFooter({
   return (
     <footer
       ref={footerRef}
-      className="home-intro-ui fixed inset-x-0 bottom-0 z-40 w-full overflow-hidden"
+      className="fixed inset-x-0 bottom-0 z-40 w-full overflow-hidden"
       data-site-footer
+      data-home-footer={isHome ? "" : undefined}
       data-footer-menu-open={menuOpenSync ? "" : undefined}
     >
       <div
         aria-hidden
-        className={`pointer-events-none absolute inset-0 z-0 bg-white transition-opacity duration-200 ease-out motion-reduce:transition-none ${
-          showFooterBackground ? "opacity-100" : "opacity-0"
-        }`}
+        className={`pointer-events-none absolute inset-0 z-0 bg-white transition-opacity duration-200 ease-out motion-reduce:transition-none ${footerBackdropClass}`}
       />
       {/* Backup — frosted footer backdrop (bg-white/90 + backdrop-blur). Restore with
           footerFullyInView state, useEffect, showFooterFrost, footerFrostMask above.
@@ -404,9 +411,7 @@ export function SiteFooter({
       >
         <div className="mx-auto w-full max-w-site lg:max-w-none">
           <div
-            className={`mx-auto w-full max-w-3xl lg:max-w-none ${
-              showMobileFooterExpanded ? "" : "max-lg:hidden"
-            }`}
+            className={`mx-auto w-full max-w-3xl lg:max-w-none ${footerChromeClass}`}
           >
             <div
               className="pointer-events-none mb-4 grid w-full grid-cols-1 items-end gap-y-2 lg:absolute lg:inset-x-0 lg:bottom-4 lg:mb-0 lg:grid-cols-[1fr_auto] lg:gap-y-0 lg:px-[var(--site-gutter-x)]"
@@ -494,12 +499,8 @@ export function SiteFooter({
 
         <div
           data-footer-body-region
-          aria-hidden={!showFooterBodyParagraph}
-          className={`mx-auto w-full max-w-site pb-[var(--site-gutter-y)] text-justify transition-opacity duration-200 ease-out motion-reduce:transition-none ${
-            showFooterBodyParagraph
-              ? "opacity-100"
-              : "pointer-events-none opacity-0"
-          } ${showMobileFooterExpanded ? "" : "max-lg:hidden"}`}
+          aria-hidden={!desktopShowFullFooter && !mobileShowFullFooter}
+          className={`mx-auto w-full max-w-site text-justify transition-opacity duration-200 ease-out motion-reduce:transition-none ${footerBodyClass}`}
         >
             {footerBody?.length ? (
               <div className="mx-auto max-w-3xl text-[length:var(--text-small)] leading-[1.2em] text-[var(--color-muted)] [&_a]:!text-[var(--color-ink)] [&_a]:no-underline [&_li]:!text-[var(--color-muted)] [&_p]:!text-[var(--color-muted)] [&_strong]:!text-[var(--color-ink)]">
@@ -579,8 +580,7 @@ export function SiteFooter({
             )}
         </div>
 
-        {(footerAddressLeft || footerAddressRight) &&
-          (!isHome || isDesktopViewport || menuOpenSync || prefersReducedMotion) && (
+        {(footerAddressLeft || footerAddressRight) && (
           <div className="mx-auto mt-0 w-full max-w-site">
             <div className="mx-auto w-full max-w-3xl">
               {addressMapsHref ? (

@@ -6,6 +6,7 @@ import { SanityStudioIcon } from "@/components/SanityStudioIcon";
 import { schemaTypes } from "@/sanity/schemaTypes";
 import { structure } from "@/sanity/structure";
 import { dataset, projectId } from "@/sanity/env";
+import { studioBasePath } from "@/sanity/studioBasePath";
 
 export default defineConfig({
   name: "primary-photographic",
@@ -13,7 +14,7 @@ export default defineConfig({
   icon: SanityStudioIcon,
   projectId: projectId || "",
   dataset,
-  basePath: "/studio",
+  basePath: studioBasePath,
   plugins: [structureTool({ structure }), media()],
   schema: { types: schemaTypes },
 });

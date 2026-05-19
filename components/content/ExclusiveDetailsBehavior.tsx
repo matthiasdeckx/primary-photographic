@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { scrollListingIntoView } from "@/lib/scrollListingIntoView";
+
 type Props = {
   rootSelector: string;
 };
@@ -28,8 +30,10 @@ export function ExclusiveDetailsBehavior({ rootSelector }: Props) {
           if (node !== target) node.open = false;
         }
 
-        window.requestAnimationFrame(() => {
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            scrollListingIntoView(target);
+          });
         });
       };
 

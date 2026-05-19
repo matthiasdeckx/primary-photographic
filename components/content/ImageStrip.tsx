@@ -34,6 +34,7 @@ export function ImageStrip({
   const stripTapStartRef = useRef<{ x: number; y: number } | null>(null);
   const stripTapMovedRef = useRef(false);
   const stripSwiperRef = useRef<SwiperType | null>(null);
+  const stripContainerRef = useRef<HTMLDivElement | null>(null);
 
   const usableImages = useMemo(
     () =>
@@ -55,10 +56,32 @@ export function ImageStrip({
     [images],
   );
 
-  if (!usableImages.length) return null;
   const isSingleImage = usableImages.length === 1;
 
-  const frameHeightClass = tall ? "h-[400px]" : "h-[400px]";
+  /**
+   * Swiper's built-in `loop` breaks with few `slidesPerView: auto` slides on wide screens.
+   * Repeat the deck 3× and re-center in the middle copy for seamless infinite scroll.
+   */
+  const swiperDeck = useMemo(() => {
+    if (usableImages.length <= 1) {
+      return { slides: [] as Array<{ img: (typeof usableImages)[0]; sourceIndex: number; swiperKey: string }>, initialIndex: 0 };
+    }
+    const repeat = 3;
+    const slides = Array.from({ length: repeat * usableImages.length }, (_, idx) => {
+      const sourceIndex = idx % usableImages.length;
+      const img = usableImages[sourceIndex];
+      return {
+        img,
+        sourceIndex,
+        swiperKey: `${img.key}-deck-${idx}`,
+      };
+    });
+    return { slides, initialIndex: usableImages.length };
+  }, [usableImages]);
+
+  if (!usableImages.length) return null;
+
+  const frameHeightClass = "h-[500px] max-h-[500px]";
   const uiInset = "calc(1rem * var(--space-scale, 1))";
   const TAP_DRAG_THRESHOLD_PX = 8;
 
@@ -150,6 +173,54 @@ export function ImageStrip({
     };
   }, []);
 
+  /** Swiper is often inside a closed `<details>` — init at 0 width hides slides until update. */
+  useEffect(() => {
+    const container = stripContainerRef.current;
+    if (!container || isSingleImage) return;
+
+    const refreshSwiper = () => {
+      const swiper = stripSwiperRef.current;
+      if (!swiper || swiper.destroyed) return;
+      swiper.update();
+      swiper.slideTo(swiperDeck.initialIndex, 0);
+    };
+
+    const details = container.closest("details");
+    const onDetailsToggle = () => {
+      if (details instanceof HTMLDetailsElement && details.open) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(refreshSwiper);
+        });
+      }
+    };
+
+    details?.addEventListener("toggle", onDetailsToggle);
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) refreshSwiper();
+      },
+      { threshold: 0.05 },
+    );
+    io.observe(container);
+
+    return () => {
+      details?.removeEventListener("toggle", onDetailsToggle);
+      io.disconnect();
+    };
+  }, [isSingleImage, swiperDeck.initialIndex]);
+
+  const normalizeSwiperDeckPosition = (swiper: SwiperType) => {
+    const count = usableImages.length;
+    if (count < 2) return;
+    const idx = swiper.activeIndex;
+    if (idx < count) {
+      swiper.slideTo(idx + count, 0);
+    } else if (idx >= count * 2) {
+      swiper.slideTo(idx - count, 0);
+    }
+  };
+
   return (
     <>
       {isSingleImage ? (
@@ -205,7 +276,7 @@ export function ImageStrip({
           </figure>
         </div>
       ) : (
-        <div className="relative mt-6">
+        <div ref={stripContainerRef} className="relative mt-6">
           <button
             type="button"
             onClick={() => stripSwiperRef.current?.slidePrev(500)}
@@ -224,11 +295,16 @@ export function ImageStrip({
           </button>
           <Swiper
             modules={[Autoplay, Mousewheel]}
-            loop
+            centeredSlides
+            centeredSlidesBounds={false}
+            initialSlide={swiperDeck.initialIndex}
             grabCursor
             slidesPerView="auto"
             spaceBetween={12}
             speed={600}
+            observer
+            observeParents
+            resizeObserver
             mousewheel={{
               enabled: true,
               forceToAxis: true,
@@ -239,13 +315,17 @@ export function ImageStrip({
               disableOnInteraction: false,
               pauseOnMouseEnter: true,
             }}
-            className="-mx-1 px-1"
+            className="w-full overflow-hidden"
             onSwiper={(instance) => {
               stripSwiperRef.current = instance;
+              instance.slideTo(swiperDeck.initialIndex, 0);
+            }}
+            onSlideChange={(instance) => {
+              normalizeSwiperDeckPosition(instance);
             }}
           >
-            {usableImages.map((img, i) => (
-              <SwiperSlide key={img.key} className="!w-auto">
+            {swiperDeck.slides.map(({ img, sourceIndex, swiperKey }) => (
+              <SwiperSlide key={swiperKey} className="!w-auto shrink-0">
                 <figure className="flex shrink-0 flex-col items-center">
                   <button
                     type="button"
@@ -258,19 +338,20 @@ export function ImageStrip({
                         e.preventDefault();
                         return;
                       }
-                      openLightbox(i);
+                      openLightbox(sourceIndex);
                     }}
-                    aria-label={`Open image ${i + 1} in lightbox`}
+                    aria-label={`Open image ${sourceIndex + 1} in lightbox`}
                   >
                     <img
                       src={img.url}
                       alt={img.alt}
-                      loading="lazy"
+                      loading="eager"
+                      decoding="async"
                       onLoad={() =>
                         setLoadedKeys((prev) => ({ ...prev, [img.key]: true }))
                       }
                       className={`load-in-image ${frameHeightClass} block w-auto max-w-none object-contain transition-opacity duration-300 ${
-                        loadedKeys[img.key] ? "opacity-100" : "opacity-0"
+                        loadedKeys[img.key] ? "opacity-100" : "opacity-[0.15]"
                       }`}
                       style={
                         !loadedKeys[img.key] && img.blurUrl
