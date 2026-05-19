@@ -414,15 +414,15 @@ export function SiteFooter({
             className={`mx-auto w-full max-w-3xl lg:max-w-none ${footerChromeClass}`}
           >
             <div
-              className="pointer-events-none mb-4 grid w-full grid-cols-1 items-end gap-y-2 lg:absolute lg:inset-x-0 lg:bottom-4 lg:mb-0 lg:grid-cols-[1fr_auto] lg:gap-y-0 lg:px-[var(--site-gutter-x)]"
+              className="pointer-events-none z-0 mb-4 grid w-full grid-cols-1 items-end gap-y-2 lg:absolute lg:inset-x-0 lg:bottom-4 lg:mb-0 lg:grid-cols-[1fr_auto] lg:gap-y-0 lg:px-[var(--site-gutter-x)]"
               style={{
                 gap: "calc(1rem * var(--space-scale, 1))",
               }}
             >
-              <div className="pointer-events-auto hidden w-full justify-self-start lg:block">
+              <div className="pointer-events-auto hidden w-full justify-self-start lg:block lg:w-fit">
                 <LabClock schedule={labClockSchedule} />
               </div>
-              <div className="pointer-events-auto w-full justify-self-end text-[length:var(--text-small)] uppercase leading-[1.2em] text-left lg:w-auto lg:text-right">
+              <div className="pointer-events-auto w-full justify-self-end text-[length:var(--text-small)] uppercase leading-[1.2em] text-left lg:w-fit lg:text-right">
                 <div className="lg:hidden">
               <form
                 className="flex w-full items-baseline"
@@ -581,7 +581,7 @@ export function SiteFooter({
         </div>
 
         {(footerAddressLeft || footerAddressRight) && (
-          <div className="mx-auto mt-0 w-full max-w-site">
+          <div className="relative z-20 mx-auto mt-0 w-full max-w-site pointer-events-auto">
             <div className="mx-auto w-full max-w-3xl">
               {addressMapsHref ? (
                 <a
