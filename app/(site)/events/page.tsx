@@ -1,4 +1,5 @@
 import { ExclusiveDetailsBehavior } from "@/components/content/ExclusiveDetailsBehavior";
+import { ListingHashNavigation } from "@/components/content/ListingHashNavigation";
 import { PortableBody } from "@/components/content/PortableBody";
 import { ImageStrip } from "@/components/content/ImageStrip";
 import { EventRow } from "@/components/events/EventRow";
@@ -28,6 +29,7 @@ export default async function EventsPage() {
   return (
     <div className="space-y-8">
       <h1 className="sr-only">Events</h1>
+      <ListingHashNavigation rootSelector="[data-events-accordion]" />
       <ExclusiveDetailsBehavior rootSelector="[data-events-accordion]" />
       <div
         className="space-y-0"

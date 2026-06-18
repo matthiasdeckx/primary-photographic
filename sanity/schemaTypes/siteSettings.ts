@@ -12,18 +12,6 @@ export const siteSettings = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "tagline",
-      title: "Tagline",
-      type: "string",
-      description: "Optional; small label (most layouts use fixed branding).",
-    }),
-    defineField({
-      name: "sendFilmUrl",
-      title: "Send film URL",
-      type: "url",
-      description: "Legacy fallback. Prefer uploading the PDF below.",
-    }),
-    defineField({
       name: "sendFilmPdf",
       title: "Send film PDF",
       type: "file",
@@ -32,141 +20,12 @@ export const siteSettings = defineType({
       },
     }),
     defineField({
-      name: "homeFeaturedItems",
-      title: "Homepage featured source documents",
+      name: "homeFeatures",
+      title: "Homepage features",
       type: "array",
       description:
-        "Select one or more Events/Commissions. Used when no custom homepage features are defined below.",
-      validation: (Rule) => Rule.min(1).warning("Select at least one featured item."),
-      of: [
-        defineField({
-          name: "homeFeaturedRef",
-          title: "Homepage featured reference",
-          type: "reference",
-          to: [{ type: "eventItem" }, { type: "commissionItem" }],
-        }),
-      ],
-    }),
-    defineField({
-      name: "homeCustomFeatures",
-      title: "Homepage custom features",
-      type: "array",
-      description:
-        "Optional manual homepage slides. If set, these are used instead of Homepage featured source documents.",
-      of: [
-        defineField({
-          name: "homeCustomFeature",
-          title: "Homepage custom feature",
-          type: "object",
-          fields: [
-            defineField({
-              name: "title",
-              title: "Title",
-              type: "string",
-            }),
-            defineField({
-              name: "meta",
-              title: "Meta text",
-              type: "string",
-              description: "Small secondary text shown next to title in top-left utility.",
-            }),
-            defineField({
-              name: "href",
-              title: "Link URL",
-              type: "string",
-              description: "Optional target for top-left click (e.g. /events or external URL).",
-            }),
-            defineField({
-              name: "images",
-              title: "Images",
-              type: "array",
-              validation: (Rule) => Rule.max(5).warning("Use up to 5 images."),
-              of: [
-                defineField({
-                  name: "featureImage",
-                  type: "image",
-                  options: { hotspot: true },
-                  fields: [
-                    defineField({
-                      name: "alt",
-                      type: "string",
-                      title: "Alternative text",
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-          preview: {
-            select: {
-              title: "title",
-              subtitle: "meta",
-            },
-            prepare({ title, subtitle }) {
-              return {
-                title: title || "Custom feature",
-                subtitle: subtitle || "",
-              };
-            },
-          },
-        }),
-      ],
-    }),
-    defineField({
-      name: "homeSpotlightLeft",
-      title: "Home spotlight — left",
-      type: "string",
-      description: "Legacy fallback. Prefer ‘Homepage featured source documents’.",
-    }),
-    defineField({
-      name: "homeSpotlightRight",
-      title: "Home spotlight — right",
-      type: "string",
-      description: "e.g. “Until 06 Apr, 2026” (right column).",
-    }),
-    defineField({
-      name: "heroImageLeft",
-      title: "Home — left image",
-      type: "image",
-      hidden: true,
-      options: { hotspot: true },
-      fields: [
-        defineField({ name: "alt", type: "string", title: "Alternative text" }),
-      ],
-    }),
-    defineField({
-      name: "heroImageRight",
-      title: "Home — right image",
-      type: "image",
-      hidden: true,
-      options: { hotspot: true },
-      fields: [
-        defineField({ name: "alt", type: "string", title: "Alternative text" }),
-      ],
-    }),
-    defineField({
-      name: "heroHeadline",
-      title: "Hero headline",
-      type: "string",
-    }),
-    defineField({
-      name: "heroSubline",
-      title: "Hero introduction",
-      type: "text",
-      rows: 4,
-    }),
-    defineField({
-      name: "heroImage",
-      title: "Hero image (single banner)",
-      type: "image",
-      options: { hotspot: true },
-      fields: [
-        defineField({
-          name: "alt",
-          type: "string",
-          title: "Alternative text",
-        }),
-      ],
+        "Homepage slides in order. Each feature is either custom content or linked to an event/commission.",
+      of: [{ type: "homeFeature" }],
     }),
     defineField({
       name: "footerBody",
@@ -183,12 +42,6 @@ export const siteSettings = defineType({
       name: "contactPhone",
       title: "Phone",
       type: "string",
-    }),
-    defineField({
-      name: "address",
-      title: "Address",
-      type: "text",
-      rows: 3,
     }),
     defineField({
       name: "addressGoogleMapsUrl",

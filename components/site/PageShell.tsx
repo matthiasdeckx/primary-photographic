@@ -11,7 +11,6 @@ type Props = {
   children: ReactNode;
   siteTitle?: string | null;
   footerBody?: PortableTextBlock[] | null;
-  sendFilmUrl?: string | null;
   sendFilmPdfUrl?: string | null;
   navigation?: NavigationPayload | null;
   homeUtilityHref?: string | null;
@@ -19,7 +18,6 @@ type Props = {
   homeUtilitySecondary?: string | null;
   email?: string | null;
   phone?: string | null;
-  address?: string | null;
   addressGoogleMapsUrl?: string | null;
   footerAddressLeft?: string | null;
   footerAddressRight?: string | null;
@@ -31,7 +29,6 @@ export function PageShell({
   children,
   siteTitle,
   footerBody,
-  sendFilmUrl,
   sendFilmPdfUrl,
   navigation,
   homeUtilityHref,
@@ -39,7 +36,6 @@ export function PageShell({
   homeUtilitySecondary,
   email,
   phone,
-  address,
   addressGoogleMapsUrl,
   footerAddressLeft,
   footerAddressRight,
@@ -50,7 +46,6 @@ export function PageShell({
     <div className="flex min-h-dvh flex-col">
       <SiteHeader
         siteTitle={siteTitle}
-        sendFilmUrl={sendFilmUrl}
         sendFilmPdfUrl={sendFilmPdfUrl}
         navigation={navigation}
         homeUtilityHref={homeUtilityHref}
@@ -63,7 +58,6 @@ export function PageShell({
         footerBody={footerBody}
         email={email}
         phone={phone}
-        address={address}
         addressGoogleMapsUrl={addressGoogleMapsUrl}
         footerAddressLeft={footerAddressLeft}
         footerAddressRight={footerAddressRight}

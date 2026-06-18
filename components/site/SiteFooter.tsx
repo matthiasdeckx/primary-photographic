@@ -35,7 +35,6 @@ type Props = {
   footerBody?: PortableTextBlock[] | null;
   email?: string | null;
   phone?: string | null;
-  address?: string | null;
   addressGoogleMapsUrl?: string | null;
   footerAddressLeft?: string | null;
   footerAddressRight?: string | null;
@@ -48,7 +47,6 @@ export function SiteFooter({
   footerBody,
   email,
   phone,
-  address,
   addressGoogleMapsUrl,
   footerAddressLeft,
   footerAddressRight,
@@ -518,26 +516,6 @@ export function SiteFooter({
                 is a high-end
                 photographic film lab that works with professionals and amateurs
                 alike.
-                {address ? (
-                  <>
-                    {" "}
-                    Located at{" "}
-                    {addressMapsHref ? (
-                      <a
-                        href={addressMapsHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="View address on Google Maps"
-                        className="font-medium text-[var(--color-ink)] no-underline hover:opacity-60"
-                      >
-                        <strong className="font-medium whitespace-pre-line">{address}</strong>
-                      </a>
-                    ) : (
-                      <strong className="font-medium whitespace-pre-line">{address}</strong>
-                    )}
-                    .
-                  </>
-                ) : null}
                 {hours ? (
                   <>
                     {" "}

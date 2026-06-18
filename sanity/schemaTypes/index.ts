@@ -5,6 +5,7 @@ import { blockContent } from "@/sanity/schemaTypes/blockContent";
 import { daySchedule } from "@/sanity/schemaTypes/daySchedule";
 import { commissionItem } from "@/sanity/schemaTypes/commissionItem";
 import { eventItem } from "@/sanity/schemaTypes/eventItem";
+import { homeFeature } from "@/sanity/schemaTypes/homeFeature";
 import { siteSettings } from "@/sanity/schemaTypes/siteSettings";
 import { navigation } from "@/sanity/schemaTypes/navigation";
 import { pageSection } from "@/sanity/schemaTypes/pageSection";
@@ -16,6 +17,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   blockContent,
   pageSection,
   daySchedule,
+  homeFeature,
   siteSettings,
   navigation,
   technicalInfoPage,

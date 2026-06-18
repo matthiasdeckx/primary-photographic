@@ -14,6 +14,7 @@ import { barLabelForPath } from "@/components/site/pathBarLabel";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { SiteLogoFrame } from "@/components/site/SiteLogoFrame";
 import { DEFAULT_MENU_ITEMS } from "@/lib/menuDefaults";
+import { featureLinkLabel, isFeatureLink } from "@/lib/homeFeatures";
 import type {
   NavigationPayload,
   SanityBottomLink,
@@ -28,7 +29,6 @@ const bottomLinkClass =
 
 type HeaderProps = {
   siteTitle?: string | null;
-  sendFilmUrl?: string | null;
   sendFilmPdfUrl?: string | null;
   navigation?: NavigationPayload | null;
   homeUtilityHref?: string | null;
@@ -58,7 +58,6 @@ function resolveBottomLink(
 
 export function SiteHeader({
   siteTitle,
-  sendFilmUrl,
   sendFilmPdfUrl,
   navigation,
   homeUtilityHref,
@@ -99,7 +98,7 @@ export function SiteHeader({
     );
   }, [menuOpen]);
 
-  const send = sendFilmPdfUrl?.trim() || sendFilmUrl?.trim() || "#";
+  const send = sendFilmPdfUrl?.trim() || "#";
   const sendIsExternal = /^https?:\/\//i.test(send);
   const isSendFilmLabel = (label: string) => label.trim().toLowerCase() === "send film";
 
@@ -170,8 +169,53 @@ export function SiteHeader({
     return () => window.removeEventListener("home-feature-change", onFeatureChange);
   }, [isHome, utilityPrimary, utilityHref]);
 
+  const showMobileFeatureText = isHome;
+  const featureLinked = isFeatureLink(liveUtility.href);
+  const featureLabel =
+    featureLinkLabel(liveUtility.primary, liveUtility.secondary) || liveUtility.primary;
+
+  const utilityText = (
+    <p className="truncate">
+      <span>{liveUtility.primary}</span>
+      {liveUtility.secondary ? (
+        <>
+          {" "}
+          <span
+            className={
+              featureLinked
+                ? "text-[var(--color-muted)]"
+                : "text-[var(--color-muted)] group-hover:text-[var(--color-ink)]"
+            }
+          >
+            {liveUtility.secondary}
+          </span>
+        </>
+      ) : null}
+    </p>
+  );
+
   return (
     <header className="home-intro-ui fixed inset-x-0 top-0 z-50 w-full select-none">
+      {showMobileFeatureText ? (
+        <div
+          className="home-intro-ui pointer-events-none fixed inset-x-0 z-[45] px-[var(--site-gutter-x)] lg:hidden"
+          style={{ top: "var(--site-header-height, 280px)" }}
+        >
+          {featureLinked ? (
+            <div className="block min-w-0 max-w-site text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
+              {utilityText}
+            </div>
+          ) : (
+            <Link
+              href={liveUtility.href}
+              className="group pointer-events-auto block min-w-0 max-w-site text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"
+              aria-label={featureLabel}
+            >
+              {utilityText}
+            </Link>
+          )}
+        </div>
+      ) : null}
       {isHome ? (
         <div className="home-intro-logo pointer-events-none fixed left-0 top-0 z-40 hidden h-dvh w-full select-none items-center justify-center pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] lg:flex">
           <SiteLogoFrame>
@@ -208,23 +252,19 @@ export function SiteHeader({
           paddingTop: "calc(1rem * var(--space-scale, 1))",
         }}
       >
-        <Link
-          href={liveUtility.href}
-          className="group pointer-events-auto min-w-0 shrink text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]"
-          aria-label={isHome ? "Go to featured item" : "Go to homepage"}
-        >
-          <p className="truncate">
-            <span>{liveUtility.primary}</span>
-            {liveUtility.secondary ? (
-              <>
-                {" "}
-                <span className="text-[var(--color-muted)] group-hover:text-[var(--color-ink)]">
-                  {liveUtility.secondary}
-                </span>
-              </>
-            ) : null}
-          </p>
-        </Link>
+        {featureLinked ? (
+          <div className="pointer-events-auto min-w-0 shrink text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
+            {utilityText}
+          </div>
+        ) : (
+          <Link
+            href={liveUtility.href}
+            className="group pointer-events-auto min-w-0 shrink text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]"
+            aria-label={isHome ? "Go to featured item" : "Go to homepage"}
+          >
+            {utilityText}
+          </Link>
+        )}
         <div className="pointer-events-auto flex shrink-0 gap-4 text-[length:var(--text-small)] font-medium uppercase leading-[1.2em]">
           <a
             className="text-[var(--color-ink)] hover:opacity-60"

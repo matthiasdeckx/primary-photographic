@@ -1,7 +1,6 @@
 "use client";
 
 import type { PortableTextBlock } from "@portabletext/types";
-import { useEffect } from "react";
 
 import { ExclusiveDetailsBehavior } from "@/components/content/ExclusiveDetailsBehavior";
 import { ImageStrip } from "@/components/content/ImageStrip";
@@ -27,21 +26,6 @@ export type ListingEntry = {
 };
 
 export function ListingAccordion({ items }: { items: ListingEntry[] }) {
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const openFromHash = () => {
-      const hash = window.location.hash.replace(/^#/, "");
-      if (!hash) return;
-      const target = document.getElementById(hash);
-      if (target instanceof HTMLDetailsElement) {
-        target.open = true;
-      }
-    };
-    openFromHash();
-    window.addEventListener("hashchange", openFromHash);
-    return () => window.removeEventListener("hashchange", openFromHash);
-  }, []);
-
   if (!items.length) {
     return (
       <p className="text-[length:var(--text-body)] leading-[1.2em] text-[var(--color-muted)]">

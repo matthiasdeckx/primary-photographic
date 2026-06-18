@@ -1,6 +1,7 @@
 import { PortableBody } from "@/components/content/PortableBody";
 import { ImageStrip } from "@/components/content/ImageStrip";
 import { ListingAccordion } from "@/components/content/ListingAccordion";
+import { ListingHashNavigation } from "@/components/content/ListingHashNavigation";
 import { listingAnchorId } from "@/lib/listingAnchors";
 import { ListingBanner } from "@/components/listing/ListingBanner";
 import { FullBleed } from "@/components/site/FullBleed";
@@ -33,6 +34,7 @@ export default async function CommissionsPage() {
   return (
     <div className="space-y-14">
       <h1 className="sr-only">Commissions</h1>
+      <ListingHashNavigation rootSelector="[data-commissions-accordion]" />
 
       {featured ? (
         <section

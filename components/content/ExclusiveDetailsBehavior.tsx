@@ -55,4 +55,3 @@ export function ExclusiveDetailsBehavior({ rootSelector }: Props) {
 
   return null;
 }
-

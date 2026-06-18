@@ -16,39 +16,30 @@ export const navigationQuery = groq`*[_type == "navigation"][0]{
 
 export const siteSettingsQuery = groq`*[_type == "siteSettings"][0]{
   title,
-  tagline,
-  sendFilmUrl,
   "sendFilmPdfUrl": sendFilmPdf.asset->url,
-  homeCustomFeatures[]{
+  homeFeatures[]{
+    sourceType,
     title,
     meta,
     href,
-    images
+    images,
+    linkedDocument->{
+      _id,
+      _type,
+      title,
+      eyebrow,
+      eventType,
+      eventDateFrom,
+      eventDateTo,
+      eventDate,
+      category,
+      homepageFeatureImages,
+      gallery
+    }
   },
-  homeFeaturedItems[]->{
-    _id,
-    _type,
-    title,
-    eyebrow,
-    eventType,
-    eventDateFrom,
-    eventDateTo,
-    eventDate,
-    category,
-    homepageFeatureImages,
-    gallery
-  },
-  homeSpotlightLeft,
-  homeSpotlightRight,
-  heroImageLeft,
-  heroImageRight,
-  heroHeadline,
-  heroSubline,
-  heroImage,
   footerBody,
   contactEmail,
   contactPhone,
-  address,
   addressGoogleMapsUrl,
   footerAddressLeft,
   footerAddressRight,
