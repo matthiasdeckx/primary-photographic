@@ -140,14 +140,14 @@ export function SiteHeader({
     : defaultSiteTitle;
   const utilitySecondary = isHome ? homeUtilitySecondary?.trim() : "";
   const utilityHref = isHome ? homeUtilityHref?.trim() || "/" : "/";
-  const [liveUtility, setLiveUtility] = useState({
+  const [liveHomeUtility, setLiveHomeUtility] = useState({
     primary: utilityPrimary,
     secondary: utilitySecondary,
     href: utilityHref,
   });
 
   useEffect(() => {
-    setLiveUtility({
+    setLiveHomeUtility({
       primary: utilityPrimary,
       secondary: utilitySecondary,
       href: utilityHref,
@@ -159,7 +159,7 @@ export function SiteHeader({
     const onFeatureChange = (event: Event) => {
       const detail = (event as CustomEvent<HomeFeatureChangeDetail>).detail;
       if (!detail) return;
-      setLiveUtility({
+      setLiveHomeUtility({
         primary: detail.primary?.trim() || utilityPrimary,
         secondary: detail.secondary?.trim() || "",
         href: detail.href?.trim() || utilityHref,
@@ -168,6 +168,14 @@ export function SiteHeader({
     window.addEventListener("home-feature-change", onFeatureChange);
     return () => window.removeEventListener("home-feature-change", onFeatureChange);
   }, [isHome, utilityPrimary, utilityHref]);
+
+  const liveUtility = isHome
+    ? liveHomeUtility
+    : {
+        primary: defaultSiteTitle,
+        secondary: "",
+        href: "/",
+      };
 
   const showMobileFeatureText = isHome;
   const featureLinked = isFeatureLink(liveUtility.href);

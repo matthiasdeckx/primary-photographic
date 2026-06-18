@@ -280,18 +280,18 @@ export function ImageStrip({
           <button
             type="button"
             onClick={() => stripSwiperRef.current?.slidePrev(500)}
-            className="absolute left-0 top-1/2 z-10 -translate-y-1/2 px-2 py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-white drop-shadow-[0_0_2px_rgba(0,0,0,0.45)]"
+            className="absolute left-0 top-1/2 z-10 -translate-y-1/2 px-2 py-1 text-[length:var(--text-body)] leading-none text-white drop-shadow-[0_0_2px_rgba(0,0,0,0.45)]"
             aria-label="Previous strip image"
           >
-            ‹
+            ←
           </button>
           <button
             type="button"
             onClick={() => stripSwiperRef.current?.slideNext(500)}
-            className="absolute right-0 top-1/2 z-10 -translate-y-1/2 px-2 py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-white drop-shadow-[0_0_2px_rgba(0,0,0,0.45)]"
+            className="absolute right-0 top-1/2 z-10 -translate-y-1/2 px-2 py-1 text-[length:var(--text-body)] leading-none text-white drop-shadow-[0_0_2px_rgba(0,0,0,0.45)]"
             aria-label="Next strip image"
           >
-            ›
+            →
           </button>
           <Swiper
             modules={[Autoplay, Mousewheel]}
@@ -450,18 +450,18 @@ export function ImageStrip({
                   <button
                     type="button"
                     onClick={goToPrevious}
-                    className="absolute left-0 top-1/2 z-20 -translate-y-1/2 px-[var(--site-gutter-x)] py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-[var(--color-ink)]"
+                    className="absolute left-0 top-1/2 z-20 -translate-y-1/2 px-[var(--site-gutter-x)] py-1 text-[length:var(--text-body)] leading-none text-[var(--color-ink)]"
                     aria-label="Previous image"
                   >
-                    ‹
+                    ←
                   </button>
                   <button
                     type="button"
                     onClick={goToNext}
-                    className="absolute right-0 top-1/2 z-20 -translate-y-1/2 px-[var(--site-gutter-x)] py-1 text-[length:calc(var(--text-body)*1.5)] leading-none text-[var(--color-ink)]"
+                    className="absolute right-0 top-1/2 z-20 -translate-y-1/2 px-[var(--site-gutter-x)] py-1 text-[length:var(--text-body)] leading-none text-[var(--color-ink)]"
                     aria-label="Next image"
                   >
-                    ›
+                    →
                   </button>
 
                   <div className="relative h-full min-h-[50vh] w-full">
