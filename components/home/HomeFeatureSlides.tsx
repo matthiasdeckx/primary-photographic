@@ -324,7 +324,7 @@ export function HomeFeatureSlides({ slides }: { slides: HomeFeatureSlide[] }) {
                       src={image.url}
                       alt={image.alt}
                       fill
-                      className="select-none object-cover"
+                      className="select-none object-contain"
                       sizes="22vw"
                       placeholder={image.blur ? "blur" : "empty"}
                       blurDataURL={image.blur}

@@ -224,22 +224,8 @@ export function SiteHeader({
           )}
         </div>
       ) : null}
-      {isHome ? (
+      {isHome && !menuOpen ? (
         <div className="home-intro-logo pointer-events-none fixed left-0 top-0 z-40 hidden h-dvh w-full select-none items-center justify-center pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] lg:flex">
-          <SiteLogoFrame>
-            <Link
-              href="/"
-              onClick={closeMenu}
-              className="pointer-events-auto block w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"
-              aria-label="Primary Photographic — Home"
-            >
-              <SiteLogo className="w-full" />
-            </Link>
-          </SiteLogoFrame>
-        </div>
-      ) : null}
-      {!isHome && menuOpen ? (
-        <div className="menu-center-logo pointer-events-none fixed left-0 top-0 z-40 flex h-dvh w-full select-none items-center justify-center pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
           <SiteLogoFrame>
             <Link
               href="/"
