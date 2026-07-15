@@ -76,7 +76,16 @@ export function PageContentTransition({ children }: Props) {
       const pushRoute = () => {
         if (didNavigate) return;
         didNavigate = true;
+        if (leaveTimerRef.current) {
+          window.clearTimeout(leaveTimerRef.current);
+          leaveTimerRef.current = null;
+        }
         router.push(nextPath);
+        // Safety: if route push is a no-op, unlock further clicks.
+        leaveTimerRef.current = window.setTimeout(() => {
+          isLeavingRef.current = false;
+          leaveTimerRef.current = null;
+        }, FADE_OUT_MS + FADE_IN_MS + 80);
       };
       const el = contentRef.current;
 
@@ -94,10 +103,6 @@ export function PageContentTransition({ children }: Props) {
 
       leaveTimerRef.current = window.setTimeout(pushRoute, FADE_OUT_MS + 20);
       leaveAnimation.finished.then(() => {
-        if (leaveTimerRef.current) {
-          window.clearTimeout(leaveTimerRef.current);
-          leaveTimerRef.current = null;
-        }
         pushRoute();
       }).catch(() => {
         pushRoute();

@@ -65,7 +65,6 @@ export function SiteHeader({
   homeUtilitySecondary,
 }: HeaderProps) {
   const pathname = usePathname();
-  const bar = barLabelForPath(pathname);
   const isHome = pathname === "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const [barHovered, setBarHovered] = useState(false);
@@ -73,6 +72,7 @@ export function SiteHeader({
     () => resolveMenuItems(navigation ?? null),
     [navigation],
   );
+  const bar = barLabelForPath(pathname, menuItems);
   const bottomLink = useMemo(
     () => resolveBottomLink(navigation ?? null),
     [navigation],
@@ -183,7 +183,7 @@ export function SiteHeader({
     featureLinkLabel(liveUtility.primary, liveUtility.secondary) || liveUtility.primary;
 
   const utilityText = (
-    <p className="truncate">
+    <p className="line-clamp-2 whitespace-normal break-words">
       <span>{liveUtility.primary}</span>
       {liveUtility.secondary ? (
         <>
@@ -202,6 +202,14 @@ export function SiteHeader({
     </p>
   );
 
+  /** Clearance for the centered `max-w-site` menu (+ gap), relative to this padded utility row. */
+  const desktopUtilityMaxWidth =
+    "max(0px, calc((100% - var(--content-max)) / 2 - 1rem))";
+  const desktopUtilityClassName =
+    "pointer-events-auto min-w-0 shrink text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]";
+  const desktopUtilityLinkClassName = `group ${desktopUtilityClassName}`;
+  const desktopUtilityStyle = { maxWidth: desktopUtilityMaxWidth };
+
   return (
     <header className="home-intro-ui fixed inset-x-0 top-0 z-50 w-full select-none">
       {showMobileFeatureText ? (
@@ -209,19 +217,21 @@ export function SiteHeader({
           className="home-intro-ui pointer-events-none fixed inset-x-0 z-[45] px-[var(--site-gutter-x)] lg:hidden"
           style={{ top: "var(--site-header-height, 280px)" }}
         >
-          {featureLinked ? (
-            <div className="block min-w-0 max-w-site text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
-              {utilityText}
-            </div>
-          ) : (
-            <Link
-              href={liveUtility.href}
-              className="group pointer-events-auto block min-w-0 max-w-site text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"
-              aria-label={featureLabel}
-            >
-              {utilityText}
-            </Link>
-          )}
+          <div className="mx-auto w-full max-w-site">
+            {featureLinked ? (
+              <div className="block min-w-0 text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
+                {utilityText}
+              </div>
+            ) : (
+              <Link
+                href={liveUtility.href}
+                className="group pointer-events-auto block min-w-0 text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"
+                aria-label={featureLabel}
+              >
+                {utilityText}
+              </Link>
+            )}
+          </div>
         </div>
       ) : null}
       {isHome && !menuOpen ? (
@@ -247,13 +257,14 @@ export function SiteHeader({
         }}
       >
         {featureLinked ? (
-          <div className="pointer-events-auto min-w-0 shrink text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]">
+          <div className={desktopUtilityClassName} style={desktopUtilityStyle}>
             {utilityText}
           </div>
         ) : (
           <Link
             href={liveUtility.href}
-            className="group pointer-events-auto min-w-0 shrink text-[length:var(--text-small)] font-medium uppercase leading-[1.2em] text-[var(--color-ink)]"
+            className={desktopUtilityLinkClassName}
+            style={desktopUtilityStyle}
             aria-label={isHome ? "Go to featured item" : "Go to homepage"}
           >
             {utilityText}
@@ -283,7 +294,7 @@ export function SiteHeader({
       >
         <div className="mx-auto w-full max-w-site">
           <div className="flex justify-center">
-            <div className="relative w-full bg-[var(--color-ink)] text-white">
+            <div className="relative z-[80] w-full bg-[var(--color-ink)] text-white">
               <button
                 type="button"
                 className="flex w-full cursor-pointer items-center justify-center bg-[var(--color-ink)] text-[length:var(--text-body)] font-medium uppercase leading-[1.2em] text-white"
@@ -300,7 +311,7 @@ export function SiteHeader({
               {menuOpen ? (
                 <div
                   id="primary-menu-panel"
-                  className="absolute inset-x-0 top-full z-10 select-none bg-[var(--color-ink)] px-[var(--site-gutter-x)] text-white"
+                  className="absolute inset-x-0 top-full z-[80] select-none bg-[var(--color-ink)] px-[var(--site-gutter-x)] text-white"
                   style={{
                     paddingTop: "calc(1rem * var(--space-scale, 1))",
                     paddingBottom: "calc(1rem * var(--space-scale, 1))",
